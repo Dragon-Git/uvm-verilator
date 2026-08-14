@@ -5,7 +5,7 @@
 // Copyright 2018 Intel Corporation
 // Copyright 2021-2022 Marvell International Ltd.
 // Copyright 2014-2018 Mentor Graphics Corporation
-// Copyright 2013-2024 NVIDIA Corporation
+// Copyright 2013-2026 NVIDIA Corporation
 // Copyright 2014 Semifore
 // Copyright 2018 Synopsys, Inc.
 // Copyright 2017 Verific
@@ -30,8 +30,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/base/uvm_coreservice.svh $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -53,7 +53,8 @@ typedef class uvm_tr_database;
 typedef class uvm_text_tr_database;
 typedef class uvm_resource_pool;
 typedef class uvm_resource_base;
-
+typedef class uvm_test_runner;
+typedef class uvm_core_state_callback;
 
 typedef class uvm_default_coreservice_t;
 
@@ -155,12 +156,43 @@ virtual class uvm_coreservice_t extends uvm_void;
 
     pure virtual function int unsigned get_resource_pool_default_precedence();
 
-        // Function: get_phase_hopper
-        //
-        // Returns the <uvm_phase_hopper> (singleton) instance for this environment
-        //
-        // @uvm-contrib For potential contribution to 1800.2
-        pure virtual function uvm_phase_hopper get_phase_hopper();
+    // Function: get_phase_hopper
+    //
+    // Returns the <uvm_phase_hopper> (singleton) instance for this environment
+    //
+    // @uvm-contrib For potential contribution to 1800.2
+    pure virtual function uvm_phase_hopper get_phase_hopper();
+
+    // Function: get_test_runner
+    //
+    // Returns the <uvm_test_runner> (singleton) instance for this environment
+    //
+    // @uvm-contrib For potential contribution to 1800.2
+    pure virtual function uvm_test_runner get_test_runner();
+    
+    // Function: set_core_state
+    //
+    // This method is used to set the UVM core state and trigger the appropriate
+    // <uvm_run_test_callback> methods.
+    //
+    // If this method is called on an instance of the <uvm_coreservice_t> class that
+    // is not global core service, then the method shall generate a fatal error
+    // and return immediately.
+    //
+    // @uvm-contrib For potential contribution to the 1800.2 standard
+    pure virtual function void set_core_state(uvm_core_state state);
+    
+
+    // Function: initialize
+    // Initializes the core service and any internal state.
+    //
+    // This method is called automatically by the <uvm_init> method 
+    // after the core service has been determined.  It is not intended
+    // to be called by the user. except as `super.initialize()` in a
+    // subclass.
+    //
+    // @uvm-contrib For potential contribution to the 1800.2 standard
+    pure virtual function void initialize();
 
     local static uvm_coreservice_t inst;
 
@@ -372,15 +404,109 @@ class uvm_default_coreservice_t extends uvm_coreservice_t;
         return uvm_resource_base::default_precedence;
     endfunction
 
-        local uvm_phase_hopper m_hopper;
+    local uvm_phase_hopper m_hopper;
 
-        virtual function uvm_phase_hopper get_phase_hopper();
-          if (m_hopper == null) begin
-            m_hopper = uvm_phase_hopper::type_id::create("default_hopper");
-          end
-          return m_hopper;
-        endfunction // get_phase_hopper
-          
+    virtual function uvm_phase_hopper get_phase_hopper();
+      if (m_hopper == null) begin
+        m_hopper = uvm_phase_hopper::type_id::create("default_hopper");
+      end
+      return m_hopper;
+    endfunction // get_phase_hopper
+
+    local uvm_test_runner m_runner;
+
+    virtual function uvm_test_runner get_test_runner();
+      if (m_runner == null) begin
+        m_runner = uvm_test_runner::type_id::create("default_runner");
+      end
+      return m_runner;
+    endfunction // get_test_runner
+
+    // Helper function to check valid state transitions
+    protected function bit is_valid_state_transition(uvm_core_state new_state, uvm_core_state current_state);
+      case(new_state)
+        UVM_CORE_PRE_INIT:      return (current_state == UVM_CORE_UNINITIALIZED);
+        UVM_CORE_INITIALIZING:  return (current_state == UVM_CORE_PRE_INIT);
+        UVM_CORE_INITIALIZED:   return (current_state == UVM_CORE_INITIALIZING);
+        UVM_CORE_PRE_RUN:       return (current_state == UVM_CORE_INITIALIZED);
+        UVM_CORE_RUNNING:       return (current_state == UVM_CORE_PRE_RUN);
+        UVM_CORE_POST_RUN:      return (current_state == UVM_CORE_RUNNING);
+        UVM_CORE_FINISHED:      return (current_state == UVM_CORE_POST_RUN);
+        UVM_CORE_PRE_ABORT:     return 1; // Always allowed
+        UVM_CORE_ABORTED:       return (current_state == UVM_CORE_PRE_ABORT);
+        default:                return 0;
+      endcase
+    endfunction
+
+    virtual function void set_core_state(uvm_core_state state);
+      uvm_core_state current_state;
+      current_state = get_core_state();
+
+      // Check if the state transition is valid
+      if (state == UVM_CORE_PRE_INIT) begin
+        uvm_report_fatal("UVM_CORE_STATE", "Cannot set core state to UVM_CORE_PRE_INIT from uvm_coreservice_t instance, only from uvm_init");
+      end
+
+      if (!is_valid_state_transition(state, current_state)) begin
+        uvm_report_fatal("UVM_CORE_STATE", 
+          $sformatf("Invalid state transition from %s to %s", 
+                    current_state.name(), state.name()));
+      end
+      
+      m_uvm_core_state.push_front(state);
+
+      // Call the appropriate callback methods
+      uvm_core_state_callback::m_do_core_state_change(state, current_state);
+
+    endfunction
+
+    // Function: initialize
+    //
+    // Initializes the core service and any internal state.
+    //
+    // This method is called automatically by the <uvm_init> method 
+    // after the core service has been determined.  It is not intended
+    // to be called by the user. except as `super.initialize()` in a
+    // subclass.
+    //
+    // @uvm-contrib For potential contribution to the 1800.2 standard
+    virtual function void initialize();
+      // After this point, it should be safe to query the
+      // corservice for anything.  We're not done with
+      // initialization, but the coreservice (and the
+      // various elements it controls) are 'stable'.
+      //
+      // Note that a user could have something silly
+      // in their own space, like a specialization of
+      // uvm_root with a constructor that relies on a
+      // specialization of uvm_factory with a
+      // constructor that relies on the specialized
+      // root being constructed...  but there's not
+      // really anything that can be done about that.
+      
+      begin
+        uvm_root top;
+        top = uvm_root::get();
+        // These next calls were moved to uvm_init from uvm_root,
+        // because they could emit messages, resulting in the
+        // report server being queried, which causes uvm_init.
+        top.report_header();
+        top.m_check_uvm_field_flag_size();
+        // This sets up the global verbosity. Other command line args may
+        // change individual component verbosity.
+        top.m_check_verbosity();
+      end
+
+
+      // initialize compat fields from uvm_object_globals
+      uvm_default_table_printer = new();
+      uvm_default_tree_printer = new();
+      uvm_default_line_printer = new();
+      uvm_default_printer = uvm_default_table_printer;
+      uvm_default_packer = new();
+      uvm_default_comparer = new();
+    endfunction
+
     local int unsigned m_uvm_global_seed = $urandom;
     virtual function int unsigned get_global_seed();
         return m_uvm_global_seed;

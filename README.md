@@ -2,14 +2,14 @@
 
 # Scope
 
-This kit provides a Systemverilog library matching the requirements of [IEEE 1800.2-2020](https://ieeexplore.ieee.org/document/9195920). 
+This kit provides a Systemverilog library matching the requirements of [IEEE 1800.2-2020](https://ieeexplore.ieee.org/document/9195920).
 See details in the Library Release Description below.
 
 **Note:** The implementation provided deviates from the 1800.2-2020 standard, see [DEVIATIONS.md](./DEVIATIONS.md) for additional details.
 
 # Kit version
 
-1800.2 2020.3.1
+1800.2 2020.3.2
 
 # License
 
@@ -25,26 +25,41 @@ All Rights Reserved Worldwide
 # Contacts and Support
 
 If you have questions about this implementation and/or its application to verification environments, please visit the
-[Accellera UVM (IEEE 1800.2) - Methodology and BCL Forum](https://forums.accellera.org/forum/43-uvm-ieee-18002-methodology-and-bcl-forum/) or 
+[Accellera UVM (IEEE 1800.2) - Methodology and BCL Forum](https://forums.accellera.org/forum/43-uvm-ieee-18002-methodology-and-bcl-forum/) or
 contact the Accellera UVM Working Group (uvm-wg@lists.accellera.org).
 
 # Bug Fixes
 
-The following errata were fixed in 2020.3.1.
+The following errata were fixed in 2020.3.2.
 
 | Identifier | Description |
 | ------------- | ----------- |
-| [Mantis 8419](https://accellera.mantishub.io/view.php?id=8419) | Compatibility: `uvm_event#(T)::add_callback/delete_callback` missing |
-| [Mantis 8406](https://accellera.mantishub.io/view.php?id=8406) | Compatibility: add `begin/end_event` to `uvm_transaction` |
-| [Mantis 8407](https://accellera.mantishub.io/view.php?id=8407) | Compatibility: `` `uvm_print_* `` macros removed |
-| [Mantis 8405](https://accellera.mantishub.io/view.php?id=8405) | Compatibility: `uvm_deprecated_defines.svh` is missing |
-| [Mantis 8404](https://accellera.mantishub.io/view.php?id=8404) | Compatibility: `uvm_report_object::get_report_server` |
-| [Mantis 7365](https://accellera.mantishub.io/view.php?id=7365) | `+uvm_set_verbosity` does not work when a non-zero time is given |
-| [Mantis 5000](https://accellera.mantishub.io/view.php?id=5000) | `uvm_[bitstream\|integral]_to_string` is undocumented, and non scalable |
-| [Mantis 7340](https://accellera.mantishub.io/view.php?id=7340) | Request for explicit transaction_id type |
-| [Mantis 8446](https://accellera.mantishub.io/view.php?id=8446) | Add policy extension for packers to indicate array operations |
-| [Mantis 8376](https://accellera.mantishub.io/view.php?id=8376) | `static const xx` class members with initialization |
-| [Github Issue #6](https://github.com/accellera-official/uvm-core/issues/6) | Static races in `static const` declarations |
+| [Mantis 7439](https://accellera.mantishub.io/view.php?id=7439) | Back-compat: move `get_radix_str()` to `uvm_printer_knobs` |
+| [Mantis 8511](https://accellera.mantishub.io/view.php?id=8511) | Backward compatibility `begin_event` and `end_event` in `uvm_transaction` initialize later than pre-1800.2 |
+| [Mantis 8514](https://accellera.mantishub.io/view.php?id=8514) | Missing `UVM_VERSION_POST_2020_3_0` version ladder bump |
+| [Mantis 8517](https://accellera.mantishub.io/view.php?id=8517) | `uvm_report_begin` macro has unsupported function chaining |
+| [Mantis 8519](https://accellera.mantishub.io/view.php?id=8519) | Compat package lacks a default report server typedef |
+| [Mantis 8520](https://accellera.mantishub.io/view.php?id=8520) | Compatibility issues with `` `uvm_print_* `` macros |
+| [Mantis 8522](https://accellera.mantishub.io/view.php?id=8522) | `uvm_printer` can infinite loop on `print_object(...)` cycles |
+| [Mantis 8550](https://accellera.mantishub.io/view.php?id=8550) | Carry `uvm_tr_handle_t` through `uvm_component` transaction APIs |
+| [Mantis 8551](https://accellera.mantishub.io/view.php?id=8551) | Compat package should include `uvm_compat_tr_handle_t` |
+| [Mantis 8562](https://accellera.mantishub.io/view.php?id=8562) | `uvm_sequence_library_utils` causes static initialization |
+| [Mantis 8572](https://accellera.mantishub.io/view.php?id=8572) | `uvm_reg_block::get_block_by_name()` can miss subblocks |
+| [Mantis 8573](https://accellera.mantishub.io/view.php?id=8573) | `uvm_reg_block::get_reg_by_name()` can miss registers in child `uvm_reg_file` |
+| [Mantis 8577](https://accellera.mantishub.io/view.php?id=8577) | Refactor `run_test` control and callbacks into the core service |
+| [Mantis 8582](https://accellera.mantishub.io/view.php?id=8582) | Generalize `run_test` callbacks into core state callbacks |
+| [Mantis 8583](https://accellera.mantishub.io/view.php?id=8583) | Move post-coreservice `uvm_init` activities into core service initialization |
+| [Mantis 8590](https://accellera.mantishub.io/view.php?id=8590) | Compat: re-add `uvm_cmdline_processor::m_convert_verb` |
+| [Mantis 8599](https://accellera.mantishub.io/view.php?id=8599) | `get_*_by_name()` only works after `lock_model()` |
+| [Mantis 8698](https://accellera.mantishub.io/view.php?id=8698) | Compatibility issues for printer knobs |
+| [Mantis 8715](https://accellera.mantishub.io/view.php?id=8715) | `uvm_report_begin` macro does not work with sequences |
+| [Mantis 8716](https://accellera.mantishub.io/view.php?id=8716) | Suppress `SEQPRTZMB` warning at end of test for forever-running sequences |
+| [Mantis 8723](https://accellera.mantishub.io/view.php?id=8723) | `uvm_post_init_decl` can corrupt core state callback iteration |
+
+Specific notes for this release:
+
+- [Mantis 8514](https://accellera.mantishub.io/view.php?id=8514): This release corrects the version ladder by adding the missing `UVM_VERSION_POST_2020_3_0` define.
+- [Mantis 8698](https://accellera.mantishub.io/view.php?id=8698): Several compatibility fields were re-added to `m_uvm_printer_knobs`. These fields are restored for compatibility with older code, but they do not reintroduce the pre-1800.2 formatting behavior associated with those fields.
 
 
 # Installing the kit
@@ -69,7 +84,7 @@ using this UVM installation and tool version dependencies.
 
 # Library Release description
 
-Each class and method in the standard is annotated in the implementation, allowing tools to identify the corresponding section in the standard. 
+Each class and method in the standard is annotated in the implementation, allowing tools to identify the corresponding section in the standard.
 
 Example:
 ```
@@ -95,9 +110,15 @@ In addition to the APIs described in the standard, the Library includes the foll
 
 **Note:** While the Accellera UVM Working Group supports the APIs described in (1), (2) and (3) above, these APIs are technically not a part of the 1800.2 standard.  As such, any code which leverages these APIs may not be portable to alternative 1800.2 implementations.
 
+# Optional 4-state Register Data Type Feature
+
+This version of the UVM reference implementation includes an optional 4-state register data type feature.  The feature if enabled uses a logic type instead of a bit type for all register modeling elements, providing greater visibility into X/Z propagation within the DUT.
+
+Unfortunately, this feature is not guaranteed to be backwards compatible and can increase simulation memory footprint and runtime due to the additional states required to model register values, particularly in environments with large register hierarchies.  Therefore this option is disabled by default and must be enabled explicitly by defining `UVM_REG_4STATE_DATA_TYPE` before compiling UVM.
+
 # Optional Regular Expression Optimization
 
-This version of the UVM reference implementation includes an optional regular expression optimization.  The optimization caches the result of regex operations, potentially providing a significant performance increase in environments gated by large numbers accesses to the resource database, usually caused by very large component or register hierarchies. 
+This version of the UVM reference implementation includes an optional regular expression optimization.  The optimization caches the result of regex operations, potentially providing a significant performance increase in environments gated by large numbers accesses to the resource database, usually caused by very large component or register hierarchies.
 
 Unfortunately, the optimization can cause issues in environments using save/restore mechanisms, as the cached objects in the DPI calls may not be saved properly.  The optimization is therefore disabled by default and must be enabled explicitly by defining `UVM_ENABLE_RE_MATCH_CACHE` before compiling UVM.
 
@@ -218,7 +239,7 @@ In the 1800.2 libraries, this has been changed to a warning to make users more a
 
 ### `uvm_port_base::get_provided_to()` argument has changed type
 
-In libraries before 1800.2, `uvm_port_base` had an API `get_provided_to()` whose argument was `ref uvm_port_list list`.  In 1800.2, that argument was changed to `ref uvm_port_base #IF) list[string])`.
+In libraries before 1800.2, `uvm_port_base` had an API `get_provided_to()` whose argument was `ref uvm_port_list list`.  In 1800.2, that argument was changed to `ref uvm_port_base(#IF) list[string]`.
 
 Code that was calling `get_provided_to()` now must call `get_comp()`, which returns a value of type `uvm_port_component_base`, and then call `get_provided_to` from that return instead.
 
@@ -248,17 +269,17 @@ Prior to 1800.2 versions, user code could create an instance of uvm_sequence_bas
 Prior to 1800.2 versions, the file `src/macros/uvm_deprecated_defines.svh` existed and presented transitional macros for users converting from OVM, such as `` `uvm_sequencer_utils(TYPE) ``.  This file has been removed and its macros are no longer supported.
 
 ## Polling mechansim.
-The Polling mechanism is a new feature under development. Hence the API may change. It is experimental and feedback is welcome. 
+The Polling mechanism is a new feature under development. Hence the API may change. It is experimental and feedback is welcome.
 To use this feature, add the define UVM_ENABLE_EXPERIMENTAL_POLLING_API to include the polling API in your compilation. This is in addition to other defines described below which select options within the polling API.
 
-The  Polling API is a mechansim to observe signal changes in the DUT by using a signal name instead of a cross module reference. 
+The  Polling API is a mechansim to observe signal changes in the DUT by using a signal name instead of a cross module reference.
 The class is used for a number of reasons
-1. Waiting on value change of a register / field 
+1. Waiting on value change of a register / field
 2. Polling a signal for a specific value  <
-3. Performing a user-defined action upon each value change of a field in a register 
-4. Monitoring volatile fields (changed by HW) and performing prediction and transaction logging  
+3. Performing a user-defined action upon each value change of a field in a register
+4. Monitoring volatile fields (changed by HW) and performing prediction and transaction logging
 
-Note that this class is implemented with VPI functions in a corresponding .c file which must be enabled via some additional flags. 
+Note that this class is implemented with VPI functions in a corresponding .c file which must be enabled via some additional flags.
 You can avoid using VPI by extending the provided `uvm_polling_backdoor` class and registering it.
 
 
@@ -271,13 +292,13 @@ You can either enable a uvm_callback once the signal changes or use the builtin 
 Use model:
 To use the polling API, you must first decide if you wish to use the built-in VPI polling mechansim or a backdoor polling mechansim.
 
-The VPI mechanism uses VPI and DPI calls to monitor the signal, and you need to turn on the appropriate 
+The VPI mechanism uses VPI and DPI calls to monitor the signal, and you need to turn on the appropriate
 switches for your simulator to enable this mechansim.  You will also need to add an additional define to your simulator to use this mode.
 
 Using a backdoor mechanism does not require you to use VPI and you can mix and match both VPI and backdoor mechansims, but be aware that having even a single VPI polling mechansim will require additional
-switches to your simulator.  
+switches to your simulator.
 
-The VPI polling mechanism is easier to use but the backdoor mechanism is more performant.  
+The VPI polling mechanism is easier to use but the backdoor mechanism is more performant.
 
 Steps to use the polling mechansim:
 
@@ -286,7 +307,7 @@ Step 1:
 	if you choose the VPI mechansim, add the define UVM_POLLING_API_SV to your compler switches.
 
 Step 2:
-	Declare Instances of the `uvm_hdl_polling` class in your class. 
+	Declare Instances of the `uvm_hdl_polling` class in your class.
 ```
 	uvm_hdl_polling  poll1;
         uvm_hdl_polling  poll2;
@@ -305,7 +326,7 @@ Step 4:
     	poll2.register_hdl_path("top.child2.sub2.signal3");`
 ```
 Step 5:
-	Monitor the signal change using either a task or a callback. 
+	Monitor the signal change using either a task or a callback.
 	To wait for a signal change within a forked process:
 ```
 		uvm_poll_status_e status;
@@ -319,7 +340,7 @@ To use a callback mechanism, extend the callback class and implement your handle
 ```
 	class my_signal_callback extends uvm_hdl_polling_cbs;
 
-	  virtual function void do_on_path_change(string hdl_path, uvm_poll_data_t val, int size); 
+	  virtual function void do_on_path_change(string hdl_path, uvm_poll_data_t val, int size);
         ...
 	endfunction
 	...
@@ -336,69 +357,69 @@ Example:
 
 User defined Backdoor mechansim to impove performance.
 
-	The default VPI implementation of the polling API uses 
+	The default VPI implementation of the polling API uses
 	a VPI mechansim to register a value change callback and hence access to the signals in the simulator. It also uses
-	a VPI mechanism to signal a Notifier bit in the uvm_hdl_polling_pkg. 
-	
-	Consequently, you will need to turn on VPI read access to the specific design signals in your design and write access to the bit in the uvm_polling_pkg. 
+	a VPI mechanism to signal a Notifier bit in the uvm_hdl_polling_pkg.
+
+	Consequently, you will need to turn on VPI read access to the specific design signals in your design and write access to the bit in the uvm_polling_pkg.
 	Please consult your simulator vendor documentation for specifics of how to do so.
 
 	if you are sensitive to performance considerations, consider using the backdoor api. While this is more work, you will not suffer a loss of performance.
 
 	Step 1: Create a backdoor class.
 	Example:
-	
+
 ```
 		class signal2_backdoor extends uvm_polling_backdoor;
 		   `uvm_object_utils(signal2_backdoor)
-		   function new(string name="signal2_backdoor"); 
+		   function new(string name="signal2_backdoor");
 		      super.new(name);
-		   endfunction 
+		   endfunction
 		   // actions to be taken when polling bit changes
 		   virtual task poll_bkdr_wait_for_hdl_change(ref uvm_poll_status_e status, ref uvm_poll_data_t val);
 			// This is a task which will return when the signal changes. The mechansim by which it obtains a handle
-			// to the signal is user-defined. 
+			// to the signal is user-defined.
 			// is up tp
 		   endtask
 		   virtual function hdl_read(ref uvm_poll_status_e status, ref uvm_poll_data_t val);
 			// you must populate the value of the return value with the value read from the signal
-			// if you cannot read the value, you must return UVM_POLL_NOT_OK otherwise, status must be set to UVM_POLL_OK. 
-		   endfunction 
+			// if you cannot read the value, you must return UVM_POLL_NOT_OK otherwise, status must be set to UVM_POLL_OK.
+		   endfunction
 		   virtual function int get_signal_size();
 			// Return the actual value of the signal as an integer.
 		   endfunction
 		   virtual function bit create_backdoor_probe(int key, string fullname, bit enable = 1);
 			// You must ensure you can access the signal that is dicated by **fullname** in this method to be
-			// sure that you can detect value changes. 
+			// sure that you can detect value changes.
 			// For example:
-			// This may mean that in case you use an interface, you get a virtual interface handle or 
-			// register a simulator specific Cross reference.	
-		      return 1; 
+			// This may mean that in case you use an interface, you get a virtual interface handle or
+			// register a simulator specific Cross reference.
+		      return 1;
 		   endfunction
-		endclass 
-		
+		endclass
+
 
 ```
-	// Signal2 is similar.		
-		      
-	Step 2: Add backdoor to the test	
+	// Signal2 is similar.
+
+	Step 2: Add backdoor to the test
 	Example:
-	
+
 ```
-	virtual task main_phase(uvm_phase phase);	
+	virtual task main_phase(uvm_phase phase);
   	  signal1_backdoor signal1;
 	  signal2_backdoor signal2;
-      
+
 
 	  signal1 = signal1_backdoor::type_id::create("signal1");
           signal2 = signal2_backdoor::type_id::create("signal2");
-	use 
+	use
 	  poll1.set_backdoor(signal1);
 	  poll2.set_backdoor(signal2);
-	or 
+	or
       	$cast(poll1._bkdr, signal1);
       	$cast(poll2._bkdr, signal2);
-	
+
 
 ```
 ## Simple Polling task interfaces
@@ -409,7 +430,7 @@ Example:
 ```
 initial begin
       uvm_hdl_polling my_poll;
-      my_poll = uvm_get_poll("path to signal"); 
+      my_poll = uvm_get_poll("path to signal");
       begin
          uvm_poll_status_e status;
          uvm_poll_data_t val;
@@ -442,7 +463,7 @@ This unique_name can actually be the signal name if you wish or any other string
 	end
 
 
-```	
+```
 
 Save and Restore:
 	Special considerations may be required when using the PLI-Based backend with 'Save and Restore' semantics. Please consult your simulation vendor for more information.
@@ -454,6 +475,6 @@ The following information may be used for tracking the version of this file.  Pl
 
 ```
 $File:     README.md $
-$Rev:      2024-08-22 11:25:40 -0700 $
-$Hash:     2f4242f2c7d7a4f69948682895557eb89e24c414 $
+$Rev:      2026-06-10 10:00:57 -0700 $
+$Hash:     7b2dda610b341f455154c688c6dc94808645090e $
 ```

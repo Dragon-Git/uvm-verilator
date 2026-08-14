@@ -28,8 +28,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/base/uvm_transaction.svh $
-// $Rev:      2024-07-18 12:43:22 -0700 $
-// $Hash:     c114e948eeee0286b84392c4185deb679aac54b3 $
+// $Rev:      2026-02-09 11:33:21 -0800 $
+// $Hash:     dc28b529e931816335151411e086583c6069f172 $
 //
 //----------------------------------------------------------------------
 
@@ -440,7 +440,7 @@ virtual class uvm_transaction extends uvm_object;
   // The event pool instance for this transaction. This pool is used to track
   // various milestones: by default, begin, accept, and end
 
-  const local uvm_event_pool events = new("events");
+  const uvm_event_pool events = new("events");
 
 
   //----------------------------------------------------------------------------
@@ -490,6 +490,8 @@ function uvm_transaction::new (string name="",
   super.new(name);
   this.initiator = initiator;
   m_transaction_id = -1;
+  begin_event = events.get("begin");
+  end_event = events.get("end");
 endfunction // uvm_transaction
 
 

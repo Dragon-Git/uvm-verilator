@@ -4,7 +4,7 @@
 // Copyright 2007-2021 Cadence Design Systems, Inc.
 // Copyright 2021 Marvell International Ltd.
 // Copyright 2007-2013 Mentor Graphics Corporation
-// Copyright 2013-2024 NVIDIA Corporation
+// Copyright 2013-2026 NVIDIA Corporation
 // Copyright 2010-2014 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 // 
@@ -27,8 +27,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/uvm_macros.svh $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -91,7 +91,7 @@
 `include "macros/uvm_sequence_defines.svh"
 `include "macros/uvm_callback_defines.svh"
 `include "macros/uvm_reg_defines.svh"
-
+`include "macros/uvm_init_macros.svh"
 `include "deprecated/macros/uvm_sequence_defines.svh"
 
 `endif

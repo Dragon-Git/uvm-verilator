@@ -3,7 +3,7 @@
 // Copyright 2007-2018 Cadence Design Systems, Inc.
 // Copyright 2014 Intel Corporation
 // Copyright 2007-2014 Mentor Graphics Corporation
-// Copyright 2014-2024 NVIDIA Corporation
+// Copyright 2014-2026 NVIDIA Corporation
 // Copyright 2010-2014 Synopsys, Inc.
 //   All Rights Reserved Worldwide 
 //  
@@ -26,8 +26,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/macros/uvm_sequence_defines.svh $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -219,8 +219,8 @@
 
 // @uvm-ieee 1800.2-2020 auto B.3.2.1
 `define uvm_add_to_seq_lib(TYPE,LIBTYPE) \
-   static bit add_``TYPE``_to_seq_lib_``LIBTYPE =\
-      LIBTYPE::m_add_typewide_sequence(TYPE::get_type());
+  typedef uvm_sequence_library_adder#(TYPE, LIBTYPE) m_``TYPE``_to_``LIBTYPE``_adder;
+
 
 
 

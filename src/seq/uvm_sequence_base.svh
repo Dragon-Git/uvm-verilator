@@ -6,7 +6,7 @@
 // Copyright 2014-2017 Intel Corporation
 // Copyright 2021-2022 Marvell International Ltd.
 // Copyright 2007-2017 Mentor Graphics Corporation
-// Copyright 2012-2024 NVIDIA Corporation
+// Copyright 2012-2026 NVIDIA Corporation
 // Copyright 2014 Semifore
 // Copyright 2010-2014 Synopsys, Inc.
 // Copyright 2013 Verilab
@@ -31,8 +31,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/seq/uvm_sequence_base.svh $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -960,6 +960,48 @@ virtual class uvm_sequence_base extends uvm_sequence_item;
     return;
   endfunction
 
+  // Function: kill_child_sequences
+  // Calls <kill> on all children sequences currently registered with this
+  // sequence.
+  //
+  // This method is automatically called by <kill_sequence_activity>.
+  //
+  // @uvm-contrib: For potential contribution to 1800.2
+  function void kill_child_sequences();
+    foreach(children_array[i]) begin
+      i.kill();
+    end
+  endfunction : kill_child_sequences
+
+  // Function: kill_sequence_activity
+  // Kills any processes spawned by <start>, as well as any child sequences currently
+  // registered with this sequence.
+  //
+  // This method is automatically called after the <do_kill> hook
+  // completes during a <kill> operation.  The user may manually call this method
+  // within a <do_kill> implementation to allow proper cleanup of exclusive resources
+  // being accessed by the sequence.
+  //
+  // Calling <kill_sequence_activity> outside of a <kill> operation shall result in <kill>
+  // being called automatically.
+  // 
+  // @uvm-contrib: For potential contribution to 1800.2
+  function void kill_sequence_activity();
+    if (m_killing_process == null) begin
+      `uvm_warning("UVM/SEQ/KILL_SEQ_PROC", "kill_sequence_activity called outside of kill, kill shall be automatically called.")
+      this.kill();
+      return;
+    end
+    // Children sequences need to be killed first to prevent zombies.
+    kill_child_sequences();
+    // Kill sequence process, at which point the start() method will finish
+    // the kill.
+    if (m_sequence_process != null) begin
+      m_sequence_process.kill();
+      m_sequence_process = null;
+    end
+  endfunction : kill_sequence_activity
+
   // Clears the sequence state after a kill() operation.  Either
   // called by m_kill(), or start().
   function void m_killed();
@@ -975,23 +1017,27 @@ virtual class uvm_sequence_base extends uvm_sequence_item;
   function void m_kill();
     m_killing_process = process::self();
     do_kill();
-    foreach(children_array[i]) begin
-      i.kill();
-    end
-    // Kill the child process if it exists, this may
-    // kill our process, at which point the start() method
-    // will finish the kill.
-    if (m_sequence_process != null) begin
-      m_sequence_process.kill();
-      m_sequence_process = null;
-    end
+    kill_sequence_activity();
     m_killed();
   endfunction : m_kill
 
   function void process_guard_triggered(m_guard_t guard);
     if (guard == m_parent_process_guard) begin
-      `uvm_warning("SEQPRTZMB",
-                   $sformatf("The parent process that called start() on sequence '%s' was terminated without killing the sequence.  The kill() method is being automatically triggered.", get_full_name()))
+      bit skip_warn_on_parent_termination;
+      uvm_phase run_phase;
+
+      run_phase = uvm_domain::find_common_phase(uvm_run_phase::get());
+`ifndef UVM_SEQPRTZMB_WARN_ON_TEST_END
+      if ((run_phase != null) &&
+          (run_phase.get_state() inside {UVM_PHASE_CLEANUP, UVM_PHASE_DONE})) begin
+        skip_warn_on_parent_termination = 1;
+      end
+`endif
+
+      if (!skip_warn_on_parent_termination) begin
+        `uvm_warning("SEQPRTZMB",
+                     $sformatf("The parent process that called start() on sequence '%s' was terminated without killing the sequence.  The kill() method is being automatically triggered.", get_full_name()))
+      end
       this.kill();
     end
   endfunction : process_guard_triggered

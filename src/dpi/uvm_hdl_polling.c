@@ -1,6 +1,7 @@
 //----------------------------------------------------------------------
 // Copyright 2023-2024 Intel Corporation
-// Copyright 2023-2024 NVIDIA Corporation
+// Copyright 2025 Marvell International Ltd.
+// Copyright 2023-2026 NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -22,8 +23,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/dpi/uvm_hdl_polling.c $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -530,10 +531,10 @@ void * uvm_polling_create(char *name, int sv_key) {
    // Check the object is indeed a vector variable or net; error if not.
    objType = vpi_get(vpiType, obj);
    if (!isVerilogType(objType)) {
-        sprintf(buffer0, str2, name, sv_key, objType);
-        sprintf(buffer1, str1, name);
-        uvm_polling_report_info(&buffer0[0]);
-        uvm_polling_report_info(&buffer1[0]);
+      sprintf(buffer0, str1, name, sv_key, objType);
+      sprintf(buffer1, str2, name);
+      uvm_polling_report_info(&buffer0[0]);
+      uvm_polling_report_info(&buffer1[0]);
       return NULL;
    }
    // Obtain a clean object record from free memory

@@ -6,7 +6,8 @@
 // Copyright 2017-2018 Cisco Systems, Inc.
 // Copyright 2022 Marvell International Ltd.
 // Copyright 2007-2022 Mentor Graphics Corporation
-// Copyright 2013-2024 NVIDIA Corporation
+// Copyright 2013-2026 NVIDIA Corporation
+// Copyright 2025 Qualcomm, Inc.
 // Copyright 2011-2018 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -29,8 +30,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/base/uvm_recorder.svh $
-// $Rev:      2024-07-18 12:43:22 -0700 $
-// $Hash:     c114e948eeee0286b84392c4185deb679aac54b3 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -111,7 +112,7 @@ virtual class uvm_recorder extends uvm_policy;
   bit abstract = 1 ;
   
   //@uvm-compat
-  integer tr_handle;
+  uvm_tr_handle_t tr_handle;
   
    uvm_policy::recursion_state_e m_recur_states[uvm_object][uvm_recursion_policy_enum /*recursion*/] ;
    
@@ -164,14 +165,14 @@ virtual class uvm_recorder extends uvm_policy;
   endfunction : flush
 
    // Variable- m_ids_by_recorder
-   // An associative array of int, indexed by uvm_recorders.  This
+   // An associative array of uvm_tr_handle_t, indexed by uvm_recorders.  This
    // provides a unique 'id' or 'handle' for each recorder, which can be
    // used to identify the recorder.
    //
    // By default, neither ~m_ids_by_recorder~ or ~m_recorders_by_id~ are
    // used.  Recorders are only placed in the arrays when the user
    // attempts to determine the id for a recorder.
-   local static int m_ids_by_recorder[uvm_recorder];
+   local static uvm_tr_handle_t m_ids_by_recorder[uvm_recorder];
 
 
   function new(string name = "uvm_recorder");
@@ -344,7 +345,7 @@ virtual class uvm_recorder extends uvm_policy;
    // Variable- m_recorders_by_id
    // A corollary to ~m_ids_by_recorder~, this indexes the recorders by their
    // unique ids.
-   local static uvm_recorder m_recorders_by_id[int];
+   local static uvm_recorder m_recorders_by_id[uvm_tr_handle_t];
 
    // Variable- m_id
    // Static int marking the last assigned id.
@@ -353,7 +354,7 @@ virtual class uvm_recorder extends uvm_policy;
    // Function- m_free_id
    // Frees the id/recorder link (memory cleanup)
    //
-   static function void m_free_id(int id);
+   static function void m_free_id(uvm_tr_handle_t id);
       uvm_recorder recorder;
       if ((!$isunknown(id)) && (m_recorders_by_id.exists(id))) begin
         
@@ -369,12 +370,12 @@ virtual class uvm_recorder extends uvm_policy;
             
 
    // @uvm-ieee 1800.2-2020 auto 16.4.5.1
-   function int get_handle();
+   function uvm_tr_handle_t get_handle();
       if (!is_open() && !is_closed()) begin
         return 0;
       end
       else begin
-        int handle = get_inst_id();
+        uvm_tr_handle_t handle = get_inst_id();
 
         // Check for the weird case where our handle changed.
         if (m_ids_by_recorder.exists(this) && m_ids_by_recorder[this] != handle) begin
@@ -392,7 +393,7 @@ virtual class uvm_recorder extends uvm_policy;
 
 
    // @uvm-ieee 1800.2-2020 auto 16.4.5.2
-   static function uvm_recorder get_recorder_from_handle(int id);
+   static function uvm_recorder get_recorder_from_handle(uvm_tr_handle_t id);
       if (id == 0) begin
         
         return null;
@@ -507,7 +508,7 @@ virtual class uvm_recorder extends uvm_policy;
 
 
    // @uvm-ieee 1800.2-2020 auto 16.4.6.9
-   virtual function int get_record_attribute_handle();
+   virtual function uvm_tr_handle_t get_record_attribute_handle();
       return get_handle();
    endfunction : get_record_attribute_handle
    
@@ -663,7 +664,7 @@ virtual class uvm_recorder extends uvm_policy;
   // Function- check_handle_kind
   //
   //
-  virtual function int check_handle_kind (string htype, int handle);
+  virtual function int check_handle_kind (string htype, uvm_tr_handle_t handle);
      return 0;
   endfunction
   
@@ -671,12 +672,12 @@ virtual class uvm_recorder extends uvm_policy;
   // Function- begin_tr
   //
   //
-  virtual function int begin_tr(string txtype,
-                                     int stream,
-                                     string nm,
-                                     string label="",
-                                     string desc="",
-                                     time begin_time=0);
+  virtual function uvm_tr_handle_t begin_tr(string txtype,
+                                            int stream,
+                                            string nm,
+                                            string label="",
+                                            string desc="",
+                                            time begin_time=0);
     return -1;
   endfunction
   
@@ -684,7 +685,7 @@ virtual class uvm_recorder extends uvm_policy;
   // Function- end_tr
   //
   //
-  virtual function void end_tr (int handle, time end_time=0);
+  virtual function void end_tr (uvm_tr_handle_t handle, time end_time=0);
   endfunction
   
   
@@ -701,7 +702,7 @@ virtual class uvm_recorder extends uvm_policy;
   // Function- free_tr
   //
   //
-  virtual function void free_tr(int handle);
+  virtual function void free_tr(uvm_tr_handle_t handle);
   endfunction
   
 endclass // uvm_recorder
@@ -1099,7 +1100,7 @@ class uvm_text_recorder extends uvm_recorder;
   // Function- check_handle_kind
   //
   //
-  virtual function int check_handle_kind (string htype, int handle);
+  virtual function int check_handle_kind (string htype, uvm_tr_handle_t handle);
      return ((uvm_recorder::get_recorder_from_handle(handle) != null) ||
              (uvm_tr_stream::get_stream_from_handle(handle) != null));
   endfunction
@@ -1108,12 +1109,12 @@ class uvm_text_recorder extends uvm_recorder;
   // Function- begin_tr
   //
   //
-  virtual function int begin_tr(string txtype,
-                                     int stream,
-                                     string nm,
-                                     string label="",
-                                     string desc="",
-                                     time begin_time=0);
+  virtual function uvm_tr_handle_t begin_tr(string txtype,
+                                            int stream,
+                                            string nm,
+                                            string label="",
+                                            string desc="",
+                                            time begin_time=0);
      if (open_file()) begin
        uvm_tr_stream stream_obj = uvm_tr_stream::get_stream_from_handle(stream);
        uvm_recorder recorder;
@@ -1135,7 +1136,7 @@ class uvm_text_recorder extends uvm_recorder;
   // Function- end_tr
   //
   //
-  virtual function void end_tr (int handle, time end_time=0);
+  virtual function void end_tr (uvm_tr_handle_t handle, time end_time=0);
      if (open_file()) begin
        uvm_recorder record = uvm_recorder::get_recorder_from_handle(handle);
        if (record != null) begin
@@ -1163,7 +1164,7 @@ class uvm_text_recorder extends uvm_recorder;
   // Function- free_tr
   //
   //
-  virtual function void free_tr(int handle);
+  virtual function void free_tr(uvm_tr_handle_t handle);
      if (open_file()) begin
        uvm_recorder record = uvm_recorder::get_recorder_from_handle(handle);
        if (record != null) begin

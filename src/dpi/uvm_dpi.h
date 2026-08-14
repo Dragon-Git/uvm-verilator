@@ -1,7 +1,8 @@
 //----------------------------------------------------------------------
 // Copyright 2010-2018 Cadence Design Systems, Inc.
+// Copyright 2026 Marvell International Ltd.
 // Copyright 2010-2017 Mentor Graphics Corporation
-// Copyright 2013-2024 NVIDIA Corporation
+// Copyright 2013-2026 NVIDIA Corporation
 // Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -24,8 +25,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/dpi/uvm_dpi.h $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -42,7 +43,9 @@
 #include "vpi_user.h"
 #include "veriuser.h"
 #include "svdpi.h"
-#include <malloc.h>
+#ifndef UVM_NO_MALLOC
+   #include <malloc.h>
+#endif
 #include <string.h>
 #include <stdio.h>
 #include <regex.h>

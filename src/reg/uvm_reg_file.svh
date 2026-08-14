@@ -3,7 +3,8 @@
 // Copyright 2010 AMD
 // Copyright 2010-2018 Cadence Design Systems, Inc.
 // Copyright 2010-2011 Mentor Graphics Corporation
-// Copyright 2015-2024 NVIDIA Corporation
+// Copyright 2025 Microsoft
+// Copyright 2015-2026 NVIDIA Corporation
 // Copyright 2014 Semifore
 // Copyright 2010-2018 Synopsys, Inc.
 //    All Rights Reserved Worldwide
@@ -28,8 +29,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/reg/uvm_reg_file.svh $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -52,7 +53,7 @@ class uvm_reg_file extends uvm_object;
 
 
    // @uvm-ieee 1800.2-2020 auto 18.3.2.1
-   extern function                  new        (string name="");
+   extern function new(string name="");
 
 
    // @uvm-ieee 1800.2-2020 auto 18.3.2.2
@@ -160,6 +161,7 @@ function void uvm_reg_file::configure(uvm_reg_block blk_parent, uvm_reg_file reg
      end
 
    this.parent = blk_parent;
+   this.parent.add_rf(this);
    this.m_rf = regfile_parent;
    this.add_hdl_path(hdl_path);
 endfunction: configure

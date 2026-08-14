@@ -7,7 +7,7 @@
 // Copyright 2023 Intel Corporation
 // Copyright 2021 Marvell International Ltd.
 // Copyright 2007-2011 Mentor Graphics Corporation
-// Copyright 2013-2024 NVIDIA Corporation
+// Copyright 2013-2026 NVIDIA Corporation
 // Copyright 2010-2018 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -30,8 +30,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/base/uvm_base.svh $
-// $Rev:      2024-07-18 12:43:22 -0700 $
-// $Hash:     c114e948eeee0286b84392c4185deb679aac54b3 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -51,6 +51,7 @@
   `include "base/uvm_misc.svh"
   
   `include "base/uvm_coreservice.svh"
+  `include "base/uvm_test_runner.svh"
   `include "base/uvm_globals.svh"
   
 
@@ -121,6 +122,8 @@
   `include "base/uvm_runtime_phases.svh"
   `include "base/uvm_phase_hopper.svh"
 
+  `include "base/uvm_core_state_callback.svh"
+  `include "base/uvm_deferred_initialization.svh"
   `include "base/uvm_run_test_callback.svh"
   `include "base/uvm_component.svh"
 

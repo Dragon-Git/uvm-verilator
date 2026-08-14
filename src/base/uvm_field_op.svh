@@ -1,7 +1,8 @@
 //----------------------------------------------------------------------
 // Copyright 2018 Cadence Design Systems, Inc.
 // Copyright 2018 Cisco Systems, Inc.
-// Copyright 2018-2024 NVIDIA Corporation
+// Copyright 2026 Microsoft
+// Copyright 2018-2026 NVIDIA Corporation
 // Copyright 2018 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -24,8 +25,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/base/uvm_field_op.svh $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-06-10 09:59:36 -0700 $
+// $Hash:     d69bd29b12f83a7fb6866ad5fd1247d0968f1bca $
 //
 //----------------------------------------------------------------------
 
@@ -44,14 +45,14 @@ class uvm_field_op extends uvm_object;
    local uvm_policy m_policy;
    local bit m_user_hook;
    local uvm_object m_object;
-   // Bit m_is_set is set when the set() method is called and acts 
+   // Bit m_is_set is set when the set() method is called and acts
    // like a state variable. It is cleared when flush is called.
    local bit m_is_set;
    local  uvm_field_flag_t m_op_type;
 
 
-   // Function -- new 
-   // 
+   // Function -- new
+   //
    // Creates a policy with the specified instance name. If name is not provided, then the policy instance is
    // unnamed.
 
@@ -65,68 +66,62 @@ class uvm_field_op extends uvm_object;
 
    // @uvm-ieee 1800.2-2020 auto 5.7.2.2
    virtual function void set( uvm_field_flag_t op_type, uvm_policy policy = null, uvm_object rhs = null);
-     string matching_ops[$];
-     if (op_type & UVM_COPY) begin
-       
-       matching_ops.push_back("UVM_COPY");
-     end
+      uvm_field_flag_t flag_check;
 
-     if (op_type & UVM_COMPARE) begin
-       
-       matching_ops.push_back("UVM_COMPARE");
-     end
+      flag_check = (op_type & ( UVM_COPY | UVM_COMPARE | UVM_PRINT | UVM_RECORD | UVM_PACK | UVM_UNPACK | UVM_SET));
 
-     if (op_type & UVM_PRINT) begin
-       
-       matching_ops.push_back("UVM_PRINT");
-     end
+      if (flag_check & !$onehot(flag_check)) begin
+         string msg_queue[$];
 
-     if (op_type & UVM_RECORD) begin
-       
-       matching_ops.push_back("UVM_RECORD");
-     end
+         msg_queue.push_back("(");
 
-     if (op_type & UVM_PACK) begin
-       
-       matching_ops.push_back("UVM_PACK");
-     end
-
-     if (op_type & UVM_UNPACK) begin
-       
-       matching_ops.push_back("UVM_UNPACK");
-     end
-
-     if (op_type & UVM_SET) begin
-       
-       matching_ops.push_back("UVM_SET");
-     end
-
-
-     if (matching_ops.size() > 1) begin
-       string msg_queue[$];
-       msg_queue.push_back("(");
-       foreach (matching_ops[i]) begin
-         msg_queue.push_back(matching_ops[i]);
-         if (i != matching_ops.size() - 1) begin
-           
-           msg_queue.push_back(",");
+         if (op_type & UVM_COPY) begin
+            msg_queue.push_back("UVM_COPY");
+            msg_queue.push_back(",");
          end
 
-       end
-       msg_queue.push_back(")");
-       `uvm_error("UVM/FIELD_OP/SET_BAD_OP_TYPE", {"set() was passed op_type matching multiple operations: ", `UVM_STRING_QUEUE_STREAMING_PACK(msg_queue)})
-     end
+         if (op_type & UVM_COMPARE) begin
+            msg_queue.push_back("UVM_COMPARE");
+            msg_queue.push_back(",");
+         end
 
-     if(m_is_set == 0) begin
-       m_op_type = op_type;
-       m_policy = policy;
-       m_object = rhs;
-       m_is_set = 1'b1;
-     end 
-     else begin
-       `uvm_error("UVM/FIELD_OP/SET","Attempting to set values in policy without flushing")
-     end
-   endfunction 
+         if (op_type & UVM_PRINT) begin
+            msg_queue.push_back("UVM_PRINT");
+            msg_queue.push_back(",");
+         end
+
+         if (op_type & UVM_RECORD) begin
+            msg_queue.push_back("UVM_RECORD");
+            msg_queue.push_back(",");
+         end
+
+         if (op_type & UVM_PACK) begin
+            msg_queue.push_back("UVM_PACK");
+            msg_queue.push_back(",");
+         end
+
+         if (op_type & UVM_UNPACK) begin
+            msg_queue.push_back("UVM_UNPACK");
+            msg_queue.push_back(",");
+         end
+
+         if (op_type & UVM_SET) begin
+            msg_queue.push_back("UVM_SET");
+            msg_queue.push_back(",");
+         end
+         msg_queue[$] = ")";
+         `uvm_error("UVM/FIELD_OP/SET_BAD_OP_TYPE", {"set() was passed op_type matching multiple operations: ", `UVM_STRING_QUEUE_STREAMING_PACK(msg_queue)})
+      end
+      if(m_is_set == 0) begin
+         m_op_type = op_type;
+         m_policy = policy;
+         m_object = rhs;
+         m_is_set = 1'b1;
+      end
+      else begin
+         `uvm_error("UVM/FIELD_OP/SET","Attempting to set values in policy without flushing")
+      end
+   endfunction
 
    // @uvm-ieee 1800.2-2020 auto 5.7.2.3
    virtual function string get_op_name();
@@ -168,8 +163,8 @@ class uvm_field_op extends uvm_object;
 
    // @uvm-ieee 1800.2-2020 auto 5.7.2.4
    virtual function uvm_field_flag_t get_op_type();
-      if(m_is_set == 1'b1) begin 
-        
+      if(m_is_set == 1'b1) begin
+
         return m_op_type;
       end
 
@@ -181,8 +176,8 @@ class uvm_field_op extends uvm_object;
 
    // @uvm-ieee 1800.2-2020 auto 5.7.2.5
    virtual function uvm_policy get_policy();
-      if(m_is_set == 1'b1) begin 
-        
+      if(m_is_set == 1'b1) begin
+
         return m_policy;
       end
 
@@ -193,8 +188,8 @@ class uvm_field_op extends uvm_object;
 
    // @uvm-ieee 1800.2-2020 auto 5.7.2.6
    virtual function uvm_object get_rhs();
-      if(m_is_set == 1'b1) begin 
-        
+      if(m_is_set == 1'b1) begin
+
         return m_object;
       end
 
@@ -205,8 +200,8 @@ class uvm_field_op extends uvm_object;
 
    // @uvm-ieee 1800.2-2020 auto 5.7.2.7
    function bit user_hook_enabled();
-      if(m_is_set == 1'b1) begin 
-        
+      if(m_is_set == 1'b1) begin
+
         return m_user_hook;
       end
 
@@ -220,7 +215,7 @@ class uvm_field_op extends uvm_object;
       m_user_hook = 1'b0;
    endfunction
 
-   static uvm_field_op m_recycled_op[$] ; 
+   static uvm_field_op m_recycled_op[$] ;
 
    // @uvm-ieee 1800.2-2020 auto 5.7.2.9
    virtual function void flush();
@@ -235,8 +230,8 @@ class uvm_field_op extends uvm_object;
    function void m_recycle();
      this.flush();
      m_recycled_op.push_back(this);
-   endfunction : m_recycle 
- 
+   endfunction : m_recycle
+
    static function uvm_field_op m_get_available_op() ;
       uvm_field_op field_op ;
       if (m_recycled_op.size() > 0) begin

@@ -2,7 +2,8 @@
 // Copyright 2010 AMD
 // Copyright 2010-2018 Cadence Design Systems, Inc.
 // Copyright 2010-2011 Mentor Graphics Corporation
-// Copyright 2014-2024 NVIDIA Corporation
+// Copyright 2026 Microsoft
+// Copyright 2014-2026 NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -24,8 +25,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/macros/uvm_reg_defines.svh $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-06-10 09:59:36 -0700 $
+// $Hash:     d69bd29b12f83a7fb6866ad5fd1247d0968f1bca $
 //
 //----------------------------------------------------------------------
 
@@ -70,8 +71,8 @@
 
 
 // @uvm-ieee 1800.2-2020 manual B.6.6
-`ifndef UVM_REG_BYTENABLE_WIDTH 
-  `define UVM_REG_BYTENABLE_WIDTH ((`UVM_REG_DATA_WIDTH-1)/8+1) 
+`ifndef UVM_REG_BYTENABLE_WIDTH
+  `define UVM_REG_BYTENABLE_WIDTH ((`UVM_REG_DATA_WIDTH-1)/8+1)
 `endif
 
 
@@ -85,4 +86,18 @@
 // @uvm-ieee 1800.2-2020 manual B.6.7
 `ifndef UVM_REG_CVR_WIDTH
  `define UVM_REG_CVR_WIDTH 32
+`endif
+
+// Macro -- NODOCS -- `UVM_REG_4STATE_DATA_TYPE
+//
+// Use 4-state/logic data type for register model data values.
+//
+// Default value is bit.
+//
+
+// @uvm-accellera The details of this API are specific to the Accellera implementation
+`ifdef UVM_REG_4STATE_DATA_TYPE
+ `define UVM_REG_DATA_TYPE logic
+`else
+ `define UVM_REG_DATA_TYPE bit
 `endif

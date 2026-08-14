@@ -6,7 +6,7 @@
 // Copyright 2017 Cisco Systems, Inc.
 // Copyright 2021-2023 Marvell International Ltd.
 // Copyright 2010-2018 Mentor Graphics Corporation
-// Copyright 2013-2024 NVIDIA Corporation
+// Copyright 2013-2026 NVIDIA Corporation
 // Copyright 2011 Synopsys, Inc.
 // Copyright 2020 Verific
 //   All Rights Reserved Worldwide
@@ -30,8 +30,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/base/uvm_cmdline_processor.svh $
-// $Rev:      2024-07-18 12:43:22 -0700 $
-// $Hash:     c114e948eeee0286b84392c4185deb679aac54b3 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -355,6 +355,10 @@ class uvm_cmdline_processor extends uvm_report_object;
       end 
     while(s!=""); 
 
+  endfunction
+
+  function bit m_convert_verb(string verb_str, output uvm_verbosity verb_enum);
+    return uvm_string_to_verbosity(verb_str, verb_enum);
   endfunction
 
 endclass

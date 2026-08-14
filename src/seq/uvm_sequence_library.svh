@@ -3,7 +3,7 @@
 // Copyright 2010-2018 Cadence Design Systems, Inc.
 // Copyright 2017 Cisco Systems, Inc.
 // Copyright 2011-2020 Mentor Graphics Corporation
-// Copyright 2013-2024 NVIDIA Corporation
+// Copyright 2013-2026 NVIDIA Corporation
 // Copyright 2011-2014 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -26,8 +26,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/seq/uvm_sequence_library.svh $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -342,7 +342,46 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
 
 endclass
 
+// Base class used to defer adding of sequences to sequence libraries until
+// after uvm_init().
+virtual class uvm_sequence_library_adder_base;
 
+  // Adders register themselves into the registered_adders queue
+  static uvm_sequence_library_adder_base registered_adders[$];
+
+  // The uvm_init method calls initialize after initializing the factory
+  static function void initialize();
+    foreach(registered_adders[i]) begin
+      registered_adders[i].add();
+    end
+    // The registered adder queue is cleared after initialization
+    registered_adders.delete();
+  endfunction : initialize
+
+  // Specializations must implement the add() method, since they know
+  // the types involved.
+  pure virtual function void add();
+endclass
+
+// Specialization of base adder.
+class uvm_sequence_library_adder#(type SEQTYPE=int, type LIBTYPE=int)
+  extends uvm_sequence_library_adder_base;
+
+  typedef uvm_sequence_library_adder#(SEQTYPE, LIBTYPE) this_type;
+
+  // Registers self during construction
+  function new();
+    uvm_sequence_library_adder_base::registered_adders.push_back(this);
+  endfunction : new
+
+  // Self-constructs during static initialization
+  static this_type m_inst = new();
+
+  // Adds the typewide sequence
+  virtual function void add();
+    LIBTYPE::add_typewide_sequence(SEQTYPE::get_type());
+  endfunction : add
+endclass : uvm_sequence_library_adder
 
 //------------------------------------------------------------------------------
 //

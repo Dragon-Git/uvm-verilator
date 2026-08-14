@@ -2,7 +2,8 @@
 // -------------------------------------------------------------
 // Copyright 2010-2018 Cadence Design Systems, Inc.
 // Copyright 2010-2020 Mentor Graphics Corporation
-// Copyright 2014-2024 NVIDIA Corporation
+// Copyright 2026 Microsoft
+// Copyright 2014-2026 NVIDIA Corporation
 // Copyright 2014 Semifore
 //    All Rights Reserved Worldwide
 //
@@ -26,8 +27,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/reg/uvm_reg_fifo.svh $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-06-10 09:59:36 -0700 $
+// $Hash:     d69bd29b12f83a7fb6866ad5fd1247d0968f1bca $
 //
 //----------------------------------------------------------------------
 
@@ -125,10 +126,10 @@ class uvm_reg_fifo extends uvm_reg;
     //--------------
 
     //  Function -- NODOCS -- write
-    // 
+    //
     //  Pushes the given value to the DUT FIFO. If auto-prediction is enabled,
     //  the written value is also pushed to the abstract FIFO before the
-    //  call returns. If auto-prediction is not enabled (via 
+    //  call returns. If auto-prediction is not enabled (via
     //  <uvm_reg_map::set_auto_predict>), the value is pushed to abstract
     //  FIFO only when the write operation is observed on the target bus.
     //  This mode requires using the <uvm_reg_predictor> class.
@@ -157,7 +158,7 @@ class uvm_reg_fifo extends uvm_reg;
       m_set_cnt++;
       fifo.push_back(this.value.value);
     endfunction
-    
+
 
 
     // @uvm-ieee 1800.2-2020 auto 18.8.5.5
@@ -171,7 +172,7 @@ class uvm_reg_fifo extends uvm_reg;
                         input  int               lineno = 0);
        uvm_reg_data_t upd;
        if (!m_set_cnt || fifo.size() == 0) begin
-          
+
          return;
        end
 
@@ -190,7 +191,7 @@ class uvm_reg_fifo extends uvm_reg;
     // Function -- NODOCS -- mirror
     //
     // Reads the next value out of the DUT FIFO. If auto-prediction is
-    // enabled, the frontmost value in abstract FIFO is popped. If 
+    // enabled, the frontmost value in abstract FIFO is popped. If
     // the ~check~ argument is set and comparison is enabled with
     // <set_compare()>.
 
@@ -199,7 +200,7 @@ class uvm_reg_fifo extends uvm_reg;
     // @uvm-ieee 1800.2-2020 auto 18.8.5.1
     virtual function uvm_reg_data_t get(string fname="", int lineno=0);
        //return fifo.pop_front();
-       return fifo[0];
+       return fifo[0] & ((1 << get_n_bits())-1);
     endfunction
 
 
@@ -208,12 +209,12 @@ class uvm_reg_fifo extends uvm_reg;
     // Updates the abstract (mirror) FIFO based on <write()> and
     // <read()> operations.  When auto-prediction is on, this method
     // is called before each read, write, peek, or poke operation returns.
-    // When auto-prediction is off, this method is called by a 
+    // When auto-prediction is off, this method is called by a
     // <uvm_reg_predictor> upon receipt and conversion of an observed bus
     // operation to this register.
     //
     // If a write prediction, the observed
-    // write value is pushed to the abstract FIFO as long as it is 
+    // write value is pushed to the abstract FIFO as long as it is
     // not full and the operation did not originate from an <update()>.
     // If a read prediction, the observed read value is compared
     // with the frontmost value in the abstract FIFO if <set_compare()>
@@ -226,7 +227,7 @@ class uvm_reg_fifo extends uvm_reg;
       super.do_predict(rw,kind,be);
 
       if (rw.get_status() ==UVM_NOT_OK) begin
-        
+
         return;
       end
 
@@ -235,23 +236,23 @@ class uvm_reg_fifo extends uvm_reg;
 
         UVM_PREDICT_WRITE,
         UVM_PREDICT_DIRECT: begin
-        
+
           if (fifo.size() != m_size && !m_update_in_progress) begin
-             
+
             fifo.push_back(this.value.value);
           end
 
         end
 
         UVM_PREDICT_READ: begin
-        
+
           uvm_reg_data_t value = rw.get_value(0) & ((1 << get_n_bits())-1);
           uvm_reg_data_t mirror_val;
           if (fifo.size() == 0) begin
             return;
           end
           mirror_val = fifo.pop_front();
-          if (this.value.get_compare() == UVM_CHECK && mirror_val != value) begin
+          if (this.value.get_compare() == UVM_CHECK && mirror_val !== value) begin
             `uvm_warning("MIRROR_MISMATCH",
             $sformatf("Observed DUT read value 'h%0h != mirror value 'h%0h",value,mirror_val))
           end

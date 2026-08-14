@@ -4,7 +4,7 @@
 // Copyright 2014 Cisco Systems, Inc.
 // Copyright 2022-2023 Marvell International Ltd.
 // Copyright 2007-2014 Mentor Graphics Corporation
-// Copyright 2014-2024 NVIDIA Corporation
+// Copyright 2014-2026 NVIDIA Corporation
 // Copyright 2010-2013 Synopsys, Inc.
 // Copyright 2021 Verific
 //   All Rights Reserved Worldwide
@@ -28,8 +28,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/macros/uvm_message_defines.svh $
-// $Rev:      2024-02-26 14:05:42 -0800 $
-// $Hash:     798b28d37d7fa808e18c64153f2b40baed27a5d1 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -129,7 +129,7 @@
 // @uvm-contrib For potential contribution to a future 1800.2 standard
 `define uvm_report_begin(SEVERITY, ID, VERBOSITY, RO=uvm_get_report_object()) \
    begin \
-     uvm_pkg::uvm_report_object _local_report_object_;\
+     uvm_pkg::uvm_report_object _local_report_object_; \
      _local_report_object_ = RO.uvm_get_report_object() ; \
      if ((_local_report_object_.get_report_verbosity_level(SEVERITY, ID) >= VERBOSITY) && \
          (_local_report_object_.get_report_action(SEVERITY, ID) != uvm_pkg::UVM_NO_ACTION)) begin

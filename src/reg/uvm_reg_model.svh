@@ -5,7 +5,8 @@
 // Copyright 2014 Intel Corporation
 // Copyright 2021 Marvell International Ltd.
 // Copyright 2010-2011 Mentor Graphics Corporation
-// Copyright 2015-2024 NVIDIA Corporation
+// Copyright 2026 Microsoft
+// Copyright 2015-2026 NVIDIA Corporation
 // Copyright 2014 Semifore
 // Copyright 2004-2010 Synopsys, Inc.
 //    All Rights Reserved Worldwide
@@ -30,8 +31,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/reg/uvm_reg_model.svh $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-06-10 09:59:36 -0700 $
+// $Hash:     d69bd29b12f83a7fb6866ad5fd1247d0968f1bca $
 //
 //----------------------------------------------------------------------
 
@@ -69,9 +70,11 @@ typedef class uvm_reg_indirect_data;
 
 // Type -- NODOCS -- uvm_reg_data_t
 //
-// 2-state data value with <`UVM_REG_DATA_WIDTH> bits
+// Configurable 2-state or 4-state data value with <`UVM_REG_DATA_WIDTH> bits
+// If UVM_REG_4STATE_DATA_TYPE is defined then the data value will be 4-state
+// otherwise the data value is 2-state.
 //
-typedef  bit unsigned [`UVM_REG_DATA_WIDTH-1:0]  uvm_reg_data_t ;
+typedef `UVM_REG_DATA_TYPE unsigned [`UVM_REG_DATA_WIDTH-1:0]  uvm_reg_data_t ;
 
 
 // Type -- NODOCS -- uvm_reg_data_logic_t
@@ -186,10 +189,10 @@ typedef uvm_resource_db#(uvm_reg_cvr_t) uvm_reg_cvr_rsrc_db;
    } uvm_door_e;
 
    //@uvm-compat for compatibility with 1.2
-   parameter uvm_door_e UVM_DEFAULT_PATH = UVM_DEFAULT_DOOR ; 
+   parameter uvm_door_e UVM_DEFAULT_PATH = UVM_DEFAULT_DOOR ;
 
    //@uvm-compat for compatibility with 1.2
-   typedef uvm_door_e uvm_path_e ; 
+   typedef uvm_door_e uvm_path_e ;
 
 // Enum -- NODOCS -- uvm_check_e
 //
@@ -197,7 +200,7 @@ typedef uvm_resource_db#(uvm_reg_cvr_t) uvm_reg_cvr_rsrc_db;
 //
 // UVM_NO_CHECK   - Read only
 // UVM_CHECK      - Read and check
-//   
+//
    typedef enum {
       UVM_NO_CHECK,
       UVM_CHECK
@@ -213,7 +216,7 @@ typedef uvm_resource_db#(uvm_reg_cvr_t) uvm_reg_cvr_rsrc_db;
 // UVM_BIG_ENDIAN     - Most-significant bytes first in consecutive addresses
 // UVM_LITTLE_FIFO    - Least-significant bytes first at the same address
 // UVM_BIG_FIFO       - Most-significant bytes first at the same address
-//   
+//
    typedef enum {
       UVM_NO_ENDIAN,
       UVM_LITTLE_ENDIAN,
@@ -326,7 +329,7 @@ typedef enum bit [63:0] {
   UVM_DO_MEM_ACCESS        = 64'h0000_0000_0000_0008,
   UVM_DO_SHARED_ACCESS     = 64'h0000_0000_0000_0010,
   UVM_DO_MEM_WALK          = 64'h0000_0000_0000_0020,
-  UVM_DO_ALL_REG_MEM_TESTS = 64'hffff_ffff_ffff_ffff 
+  UVM_DO_ALL_REG_MEM_TESTS = 64'hffff_ffff_ffff_ffff
 } uvm_reg_mem_tests_e;
 
 
@@ -396,10 +399,10 @@ class uvm_hdl_path_concat extends uvm_void;
       t.offset = offset;
       t.path   = path;
       t.size   = size;
-      
+
       add_slice(t);
    endfunction
-   
+
 endclass
 
 
@@ -409,7 +412,7 @@ endclass
 
 function automatic string uvm_hdl_concat2string(uvm_hdl_path_concat concat);
    string image = "{";
-   
+
    if (concat.slices.size() == 1 &&
        concat.slices[0].offset == -1 &&
        concat.slices[0].size == -1)
@@ -418,7 +421,7 @@ function automatic string uvm_hdl_concat2string(uvm_hdl_path_concat concat);
      end
 
 
-   foreach (concat.slices[i]) 
+   foreach (concat.slices[i])
      begin
        uvm_hdl_path_slice slice=concat.slices[i];
 

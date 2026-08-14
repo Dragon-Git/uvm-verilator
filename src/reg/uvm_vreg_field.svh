@@ -3,7 +3,8 @@
 // Copyright 2010 AMD
 // Copyright 2010-2018 Cadence Design Systems, Inc.
 // Copyright 2010-2011 Mentor Graphics Corporation
-// Copyright 2014-2024 NVIDIA Corporation
+// Copyright 2026 Microsoft
+// Copyright 2014-2026 NVIDIA Corporation
 // Copyright 2004-2018 Synopsys, Inc.
 //    All Rights Reserved Worldwide
 //
@@ -27,8 +28,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/reg/uvm_vreg_field.svh $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-06-10 09:59:36 -0700 $
+// $Hash:     d69bd29b12f83a7fb6866ad5fd1247d0968f1bca $
 //
 //----------------------------------------------------------------------
 
@@ -40,7 +41,7 @@
 // A virtual field is set of contiguous bits in one or more memory locations.
 // The semantics and layout of virtual fields comes from
 // an agreement between the software and the hardware,
-// not any physical structures in the DUT. 
+// not any physical structures in the DUT.
 //
 //------------------------------------------------------------------------------
 
@@ -63,7 +64,7 @@ class uvm_vreg_field extends uvm_object;
 
    `uvm_object_utils(uvm_vreg_field)
    `uvm_register_cb(uvm_vreg_field, uvm_vreg_field_cbs)
-   
+
    local uvm_vreg parent;
    local int unsigned lsb;
    local int unsigned size;
@@ -120,13 +121,13 @@ class uvm_vreg_field extends uvm_object;
    // Returns the index of the least significant bit of the virtual field
    // in the virtual register that instantiates it.
    // An offset of 0 indicates a field that is aligned with the
-   // least-significant bit of the register. 
+   // least-significant bit of the register.
    //
    extern virtual function int unsigned get_lsb_pos_in_register();
 
    //
    // FUNCTION -- NODOCS -- get_n_bits
-   // Returns the width, in bits, of the virtual field. 
+   // Returns the width, in bits, of the virtual field.
    //
    extern virtual function int unsigned get_n_bits();
 
@@ -162,7 +163,7 @@ class uvm_vreg_field extends uvm_object;
                             input  uvm_object          extension = null,
                             input  string              fname = "",
                             input  int                 lineno = 0);
-               
+
 
 
    // @uvm-ieee 1800.2-2020 auto 18.10.4.3
@@ -253,7 +254,7 @@ virtual class uvm_vreg_field_cbs extends uvm_callback;
    function new(string name = "uvm_vreg_field_cbs");
       super.new(name);
    endfunction
-   
+
 
 
    // @uvm-ieee 1800.2-2020 auto 18.10.6.2.1
@@ -518,7 +519,7 @@ task uvm_vreg_field::write(input  longint unsigned    idx,
                               this.get_full_name(), idx,
                               (path == UVM_FRONTDOOR) ? "frontdoor" : "backdoor",
                               value),UVM_MEDIUM)
-   
+
    write_in_progress = 1'b0;
    this.fname = "";
    this.lineno = 0;
@@ -625,7 +626,7 @@ task uvm_vreg_field::read(input longint unsigned     idx,
    this.fname = "";
    this.lineno = 0;
 endtask: read
-               
+
 
 task uvm_vreg_field::poke(input  longint unsigned  idx,
                           output uvm_status_e status,
@@ -657,10 +658,13 @@ task uvm_vreg_field::poke(input  longint unsigned  idx,
    status = UVM_IS_OK;
 
    this.parent.XatomicX(1);
-
-   if (value >> this.size) begin
+   if ($isunknown(value >> this.size)) begin
+     `uvm_warning("RegModel", $sformatf("Writing value 'h%h that has unknown bits that can allow for a value greater than field \"%s\" size (%0d bits)", value, this.get_full_name(), this.get_n_bits()))
+     value &= ((1<<this.size)-1);
+   end
+   else if (value >> this.size) begin
      `uvm_warning("RegModel", $sformatf("Writing value 'h%h that is greater than field \"%s\" size (%0d bits)", value, this.get_full_name(), this.get_n_bits()))
-     value &= value & ((1<<this.size)-1);
+     value &= ((1<<this.size)-1);
    end
    tmp = 0;
 
@@ -801,7 +805,7 @@ task uvm_vreg_field::peek(input  longint unsigned  idx,
    this.fname = "";
    this.lineno = 0;
 endtask: peek
-               
+
 
 function void uvm_vreg_field::do_print (uvm_printer printer);
   super.do_print(printer);
@@ -818,19 +822,19 @@ function string uvm_vreg_field::convert2string();
             this.get_lsb_pos_in_register());
    if (read_in_progress == 1'b1) begin
      if (fname != "" && lineno != 0) begin
-         
+
        $sformat(res_str, "%s:%0d ",fname, lineno);
      end
 
-     convert2string = {convert2string, "\n", res_str, "currently executing read method"}; 
+     convert2string = {convert2string, "\n", res_str, "currently executing read method"};
    end
    if ( write_in_progress == 1'b1) begin
      if (fname != "" && lineno != 0) begin
-         
+
        $sformat(res_str, "%s:%0d ",fname, lineno);
      end
 
-     convert2string = {convert2string, "\n", res_str, "currently executing write method"}; 
+     convert2string = {convert2string, "\n", res_str, "currently executing write method"};
    end
 
 endfunction

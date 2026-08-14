@@ -132,12 +132,12 @@ if (browserType) {document.write("<div class=" + browserType + ">");if (browserV
 
 
  <!--CONTENT index=6 -->
-<div class="CMethod"><div class=CTopic><h3 class=CTitle><a name="uvm_component.begin_tr" href="../../../../src/base/uvm_component.svh">begin_tr</a></h3><div class=CBody><p>Implementation of uvm_component::begin_tr as described in IEEE 1800.2-2020.</p><blockquote><pre>function int begin_tr( uvm_transaction tr,
-                       string stream_name=&quot;main&quot;,
-                       string label=&quot;&quot;,
-                       string desc=&quot;&quot;,
-                       time begin_time=0,
-                       int parent_handle=0 );</pre></blockquote><p>As an added feature, this implementation will attempt to get a non-0 parent_handle from the parent sequence of the transaction tr if the parent_handle argument is 0 and the transaction can be cast to a uvm_sequence_item.</p></div></div></div>
+<div class="CMethod"><div class=CTopic><h3 class=CTitle><a name="uvm_component.begin_tr" href="../../../../src/base/uvm_component.svh">begin_tr</a></h3><div class=CBody><p>Implementation of uvm_component::begin_tr as described in IEEE 1800.2-2020.</p><blockquote><pre>function uvm_tr_handle_t begin_tr(uvm_transaction tr,
+                                  string stream_name=&quot;main&quot;,
+                                  string label=&quot;&quot;,
+                                  string desc=&quot;&quot;,
+                                  time begin_time=0,
+                                  uvm_tr_handle_t parent_handle=0);</pre></blockquote><p>As an added feature, this implementation will attempt to get a non-0 parent_handle from the parent sequence of the transaction tr if the parent_handle argument is 0 and the transaction can be cast to a uvm_sequence_item.</p></div></div></div>
 
 
 
