@@ -7,7 +7,8 @@
 // Copyright 2022 Intel Corporation
 // Copyright 2021-2022 Marvell International Ltd.
 // Copyright 2007-2011 Mentor Graphics Corporation
-// Copyright 2012-2024 NVIDIA Corporation
+// Copyright 2026 Microsoft
+// Copyright 2012-2026 NVIDIA Corporation
 // Copyright 2014 Semifore
 // Copyright 2010-2018 Synopsys, Inc.
 // Copyright 2017-2021 Verific
@@ -32,8 +33,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/base/uvm_root.svh $
-// $Rev:      2024-07-18 12:43:22 -0700 $
-// $Hash:     c114e948eeee0286b84392c4185deb679aac54b3 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -91,7 +92,7 @@ typedef class uvm_default_report_server;
 typedef class uvm_cmdline_verbosity;
 
 // Class: uvm_root
-// 
+//
 // Implementation of the uvm_root class, as defined in
 // 1800.2-2020 Section F.7 with the following additional API
 
@@ -155,32 +156,9 @@ class uvm_root extends uvm_component;
     // with ~$finish~.
 
     virtual function void die();
-      uvm_report_server l_rs;
-
-          // Only die once...
-          if (get_core_state() inside {UVM_CORE_PRE_ABORT,UVM_CORE_ABORTED}) begin
-            
-            return;
-          end
-
-          
-          l_rs = uvm_report_server::get_server();
-      // do the pre_abort callbacks
-          
-          m_uvm_core_state.push_front(UVM_CORE_PRE_ABORT);
-          
-          
-      m_do_pre_abort();
-          
-          uvm_run_test_callback::m_do_pre_abort();
-          
-          m_do_cmdline_checks();
-          
-      l_rs.report_summarize();
-          
-          m_uvm_core_state.push_front(UVM_CORE_ABORTED);
-          
-      $finish;
+      uvm_test_runner runner;
+      runner = uvm_test_runner::get_global_runner();
+      runner.die();
     endfunction
 
 
@@ -207,7 +185,7 @@ class uvm_root extends uvm_component;
   bit finish_on_completion = 1;
 
   // Function -- NODOCS -- get_finish_on_completion
-  
+
   virtual  function bit get_finish_on_completion();
      return finish_on_completion;
   endfunction : get_finish_on_completion
@@ -217,7 +195,7 @@ class uvm_root extends uvm_component;
   virtual  function void set_finish_on_completion(bit f);
      finish_on_completion = f;
   endfunction : set_finish_on_completion
-   
+
 //----------------------------------------------------------------------------
 // Group -- NODOCS -- Topology
 //----------------------------------------------------------------------------
@@ -266,7 +244,7 @@ class uvm_root extends uvm_component;
 
     bit  enable_print_topology = 0;
 
-    
+
     // Function: set_enable_print_topology
     //
     // Sets the variable to enable printing the entire testbench topology just after completion
@@ -275,7 +253,7 @@ class uvm_root extends uvm_component;
         // @uvm-accellera The details of this API are specific to the Accellera implementation, and are not being considered for contribution to 1800.2
 
     extern function void set_enable_print_topology  (bit enable);
-        
+
     // Function: get_enable_print_topology
     //
     // Gets the variable to enable printing the entire testbench topology just after completion of the end_of_elaboration phase..
@@ -303,14 +281,14 @@ class uvm_root extends uvm_component;
     extern function void build_phase(uvm_phase phase);
         extern local function void m_do_cl_init();
     extern local function void m_do_verbosity_settings();
-        extern local function void m_do_cmdline_checks();
+        extern /* local */ function void m_do_cmdline_checks();
     extern local function void m_do_timeout_settings();
     extern local function void m_do_factory_settings();
     extern local function void m_process_inst_override(string ovr);
     extern local function void m_process_type_override(string ovr);
     extern local function void m_do_config_settings();
     extern local function void m_do_max_quit_settings();
-    extern local function void m_do_dump_args();
+    extern /* local */ function void m_do_dump_args();
     extern local function void m_process_config(string cfg, bit is_int, is_bitstream);
     extern local function void m_process_default_sequence(string cfg);
         local string m_uvm_verbosity_settings[$];
@@ -348,7 +326,7 @@ class uvm_root extends uvm_component;
     bit m_phase_all_done;
 
         extern static function uvm_root m_uvm_get_root();
-          
+
 
     static local bit m_relnotes_done=0;
 
@@ -365,11 +343,11 @@ endclass
 // Note that uvm_top is provided for backwards compatibility, but to avoid
 // complications caused by static initialization it can no longer be a
 // const value.
-   
+
 //@uvm-compat Provided for compatibility with 1.2
 /* const */ uvm_root uvm_top;
-   
-   
+
+
 //-----------------------------------------------------------------------------
 // IMPLEMENTATION
 //-----------------------------------------------------------------------------
@@ -416,17 +394,17 @@ function uvm_root uvm_root::m_uvm_get_root();
   if (m_inst == null) begin
     uvm_root top;
     top = new();
-    uvm_top = top; // backwards compat 
-    
+    uvm_top = top; // backwards compat
+
     if (top != m_inst) begin
       // Something very, very bad has happened and
       // we already fatal'd.  Throw out the garbage
       // root.
-      
+
       return null;
     end
 
-    
+
     top.m_domain = uvm_domain::get_uvm_domain();
   end // if (m_inst == null)
   if (m_inst != uvm_top) begin
@@ -435,7 +413,7 @@ function uvm_root uvm_root::m_uvm_get_root();
   return m_inst;
 endfunction
 
-  
+
 function void uvm_root::report_header(UVM_FILE file = 0);
     string q[$];
     uvm_report_server srvr;
@@ -456,7 +434,7 @@ function void uvm_root::report_header(UVM_FILE file = 0);
 
       q.push_back("\n  This implementation of the UVM Library deviates from the 1800.2-2020\n");
       q.push_back("  standard.  See the DEVIATIONS.md file contained in the release\n");
-      q.push_back("  for more details.\n"); 
+      q.push_back("  for more details.\n");
 
     end // !m_relnotes_done
 
@@ -468,10 +446,13 @@ function void uvm_root::report_header(UVM_FILE file = 0);
     q.push_back("----------------------------------------------------------------\n");
 
     if(m_relnotes_done) begin
-        
+
       q.push_back("\n      (Specify +UVM_NO_RELNOTES to turn off this notice)\n");
     end
-
+`ifdef UVM_REG_4STATE_DATA_TYPE
+      q.push_back("\n      (UVM_REG_4STATE_DATA_TYPE is defined enabling the 4-State Register Data Type Feature.)");
+      q.push_back("\n      (This feature is non-standard, see the README for details.)\n");
+`endif
 
     `uvm_info("UVM/RELNOTES",`UVM_STRING_QUEUE_STREAMING_PACK(q),UVM_LOW)
 endfunction
@@ -482,158 +463,9 @@ endfunction
 // --------
 
 task uvm_root::run_test(string test_name="");
-    uvm_report_server l_rs;
-
-    uvm_factory factory;
-    bit testname_plusarg;
-    int test_name_count;
-    string test_names[$];
-    string msg;
-    uvm_component uvm_test_top;
-
-    process phase_runner_proc; // store thread forked below for final cleanup
-
-      uvm_run_test_callback::m_do_pre_run_test();
-
-    factory=uvm_factory::get();
-        m_uvm_core_state.push_front(UVM_CORE_PRE_RUN);
-
-    testname_plusarg = 0;
-
-    // Set up the process that decouples the thread that drops objections from
-    // the process that processes drop/all_dropped objections. Thus, if the
-    // original calling thread (the "dropper") gets killed, it does not affect
-    // drain-time and propagation of the drop up the hierarchy.
-    // Needs to be done in run_test since it needs to be in an
-    // initial block to fork a process.
-    uvm_objection::m_init_objections();
-
-    // Do the same for uvm_process_guard
-    uvm_process_guard_base::m_init_process_guards();
-  
-
-// dump cmdline args BEFORE the args are being used
-    m_do_dump_args();
-
-`ifndef UVM_NO_DPI
-
-    // Retrieve the test names provided on the command line.  Command line
-    // overrides the argument.
-    test_name_count = clp.get_arg_values("+UVM_TESTNAME=", test_names);
-
-    // If at least one, use first in queue.
-    if (test_name_count > 0) begin
-      test_name = test_names[0];
-      testname_plusarg = 1;
-    end
-
-    // If multiple, provided the warning giving the number, which one will be
-    // used and the complete list.
-    if (test_name_count > 1) begin
-      string test_list;
-      string sep;
-      for (int i = 0; i < test_names.size(); i++) begin
-        if (i != 0) begin
-                
-          sep = ", ";
-        end
-
-        test_list = {test_list, sep, test_names[i]};
-      end
-      uvm_report_warning("MULTTST",
-            $sformatf("Multiple (%0d) +UVM_TESTNAME arguments provided on the command line.  '%s' will be used.  Provided list: %s.", test_name_count, test_name, test_list), UVM_NONE);
-    end
-
-`else
-
-        `uvm_warning("NO_DPI_USED", "We are thinking of removing support for UVM_NO_DPI.  Please try this test without it and evaluate the impact")
-    // plusarg overrides argument
-    if ($value$plusargs("UVM_TESTNAME=%s", test_name)) begin
-        `uvm_info("NO_DPI_TSTNAME", "UVM_NO_DPI defined--getting UVM_TESTNAME directly, without DPI", UVM_NONE)
-        testname_plusarg = 1;
-    end
-
-`endif
-
-    // if test now defined, create it using common factory
-    if (test_name != "") begin
-
-      if(m_children.exists("uvm_test_top")) begin
-        uvm_report_fatal("TTINST",
-                "An uvm_test_top already exists via a previous call to run_test", UVM_NONE);
-        #0; // forces shutdown because $finish is forked
-      end
-      $cast(uvm_test_top, factory.create_component_by_name(test_name,
-                "", "uvm_test_top", null));
-
-      if (uvm_test_top == null) begin
-        msg = testname_plusarg ? {"command line +UVM_TESTNAME=",test_name} :
-            {"call to run_test(",test_name,")"};
-        uvm_report_fatal("INVTST",
-                {"Requested test from ",msg, " not found." }, UVM_NONE);
-      end
-    end
-
-    if (m_children.num() == 0) begin
-      uvm_report_fatal("NOCOMP",
-            {"No components instantiated. You must either instantiate",
-                " at least one component before calling run_test or use",
-                " run_test to do so. To run a test using run_test,",
-                " use +UVM_TESTNAME or supply the test name in",
-                " the argument to run_test(). Exiting simulation."}, UVM_NONE);
-      return;
-    end
-
-    begin
-      if(test_name=="") begin
-            
-        uvm_report_info("RNTST", "Running test ...", UVM_LOW);
-      end
-
-      else if (test_name == uvm_test_top.get_type_name()) begin
-            
-        uvm_report_info("RNTST", {"Running test ",test_name,"..."}, UVM_LOW);
-      end
-
-      else begin
-            
-        uvm_report_info("RNTST", {"Running test ",uvm_test_top.get_type_name()," (via factory override for test \"",test_name,"\")..."}, UVM_LOW);
-      end
-
-    end
-
-    // phase runner, isolated from calling process
-        // Note: Using a fork here may not be necessary.  If the calling
-        // process is disabled, then this process continues,
-        // but if the calling process is killed then this
-        // process is killed.  
-    fork 
-      begin
-        // spawn the phase runner task
-        uvm_phase_hopper hopper;
-        hopper = uvm_phase_hopper::get_global_hopper();
-        m_uvm_core_state.push_front(UVM_CORE_RUNNING);
-        hopper.run_phases();
-      end
-    join
-
-        m_uvm_core_state.push_front(UVM_CORE_POST_RUN);
-
-    l_rs = uvm_report_server::get_server();
-
-        uvm_run_test_callback::m_do_post_run_test();
-
-        m_do_cmdline_checks();
-  
-    l_rs.report_summarize();
-
-        m_uvm_core_state.push_front(UVM_CORE_FINISHED);
-      if (get_finish_on_completion()) begin
-        
-        $finish;
-      end
-
-
+    uvm_test_runner runner;
+    runner = uvm_test_runner::get_global_runner();
+    runner.run_test(test_name);
 endtask
 
 
@@ -644,7 +476,7 @@ function void uvm_root::find_all(string comp_match, ref uvm_component comps[$],
         input uvm_component comp=null);
 
     if (comp==null) begin
-        
+
       comp = this;
     end
 
@@ -662,7 +494,7 @@ function uvm_component uvm_root::find (string comp_match);
     find_all(comp_match,comp_list);
 
     if (comp_list.size() > 1) begin
-        
+
       uvm_report_warning("MMATCH",
             $sformatf("Found %0d components matching '%s'. Returning first match, %0s.",
                 comp_list.size(),comp_match,comp_list[0].get_full_name()), UVM_NONE);
@@ -691,7 +523,7 @@ function void uvm_root::print_topology(uvm_printer printer=null);
     end
 
     if (printer==null) begin
-        
+
       printer = uvm_printer::get_default();
     end
 
@@ -727,7 +559,7 @@ function void uvm_root::m_find_all_recurse(string comp_match, ref uvm_component 
     string name;
 
     if (comp.get_first_child(name)) begin
-        
+
       do begin
         this.m_find_all_recurse(comp_match, comps, comp.get_child(name));
       end
@@ -736,7 +568,7 @@ function void uvm_root::m_find_all_recurse(string comp_match, ref uvm_component 
 
     if (uvm_is_match(comp_match, comp.get_full_name()) &&
             comp.get_name() != "") begin /* uvm_top */
-        
+
       comps.push_back(comp);
     end
 
@@ -751,19 +583,19 @@ endfunction
 function bit uvm_root::m_add_child (uvm_component child);
     if(super.m_add_child(child)) begin
       if(child.get_name() == "uvm_test_top") begin
-                        
+
         top_levels.push_front(child);
       end
 
       else begin
-                        
+
         top_levels.push_back(child);
       end
 
       return 1;
     end
     else begin
-        
+
       return 0;
     end
 
@@ -776,7 +608,7 @@ endfunction
 function void uvm_root::build_phase(uvm_phase phase);
 
   super.build_phase(phase);
-  
+
   m_do_verbosity_settings();
   m_do_timeout_settings();
   m_do_factory_settings();
@@ -794,9 +626,9 @@ function void uvm_root::m_do_cl_init();
 
   uvm_cmdline_set_verbosity::init(this);
   foreach(uvm_cmdline_set_verbosity::settings[i]) begin
-    
+
     if (uvm_cmdline_set_verbosity::settings[i].phase == "time" && uvm_cmdline_set_verbosity::settings[i].offset != 0) begin
-      
+
       m_time_settings.push_back(uvm_cmdline_set_verbosity::settings[i]);
     end
 
@@ -808,8 +640,8 @@ function void uvm_root::m_do_cl_init();
   uvm_cmdline_set_severity::init(this);
 
 endfunction : m_do_cl_init
-  
-  
+
+
 // m_do_verbosity_settings
 // -----------------------
 
@@ -819,11 +651,11 @@ function void uvm_root::m_do_verbosity_settings();
   uvm_verbosity tmp_verb;
 
   // do time based command line verbosity settings
-  fork 
+  fork
     begin
       time last_time = 0;
       if (m_time_settings.size() > 0) begin
-        
+
         m_time_settings.sort() with ( item.offset );
       end
 
@@ -845,7 +677,7 @@ function void uvm_root::m_do_verbosity_settings();
           end
         end
       end
-    end 
+    end
   join_none // fork begin
 
 endfunction
@@ -857,7 +689,7 @@ function void uvm_root::m_do_cmdline_checks();
   string dump_args[$];
 
   uvm_cmdline_set_verbosity::check(this);
-  
+
   if(clp.get_arg_matches("+UVM_DUMP_REPORT_ARGS", dump_args)) begin
     string msgs[$];
 
@@ -869,15 +701,15 @@ function void uvm_root::m_do_cmdline_checks();
     msgs.push_back(uvm_cmdline_set_verbosity::dump());
     msgs.push_back(uvm_cmdline_set_action::dump());
     msgs.push_back(uvm_cmdline_set_severity::dump());
-     
-    uvm_report_info("REPORTARGS", 
-                    $sformatf("\n--- UVM Reporting Argument Summary ---\n%s\n", 
+
+    uvm_report_info("REPORTARGS",
+                    $sformatf("\n--- UVM Reporting Argument Summary ---\n%s\n",
                               `UVM_STRING_QUEUE_STREAMING_PACK(msgs)),
                     UVM_NONE);
   end
-  
+
 endfunction // m_do_cmdline_checks
-  
+
 // m_do_timeout_settings
 // ---------------------
 
@@ -890,7 +722,7 @@ function void uvm_root::m_do_timeout_settings();
     string override_spec;
     timeout_count = clp.get_arg_values("+UVM_TIMEOUT=", timeout_settings);
     if (timeout_count ==  0) begin
-        
+
       return;
     end
 
@@ -901,7 +733,7 @@ function void uvm_root::m_do_timeout_settings();
         string sep;
         for (int i = 0; i < timeout_settings.size(); i++) begin
           if (i != 0) begin
-                    
+
             sep = "; ";
           end
 
@@ -1021,7 +853,7 @@ function void uvm_root::m_process_config(string cfg, bit is_int, is_bitstream);
 
 
     uvm_string_split(cfg, ",", split_val);
-   
+
     if(split_val.size() == 1) begin
       uvm_report_error("UVM_CMDLINE_PROC", {"Invalid +uvm_set_config command\"", cfg,
                 "\" missing field and value: component is \"", split_val[0], "\""}, UVM_NONE);
@@ -1186,7 +1018,7 @@ function void uvm_root::m_do_max_quit_settings();
     srvr = uvm_report_server::get_server();
     max_quit_count = clp.get_arg_values("+UVM_MAX_QUIT_COUNT=", max_quit_settings);
     if (max_quit_count ==  0) begin
-        
+
       return;
     end
 
@@ -1197,7 +1029,7 @@ function void uvm_root::m_do_max_quit_settings();
         string sep;
         for (int i = 0; i < max_quit_settings.size(); i++) begin
           if (i != 0) begin
-                    
+
             sep = "; ";
           end
 
@@ -1211,7 +1043,7 @@ function void uvm_root::m_do_max_quit_settings();
             $sformatf("'+UVM_MAX_QUIT_COUNT=%s' provided on the command line is being applied.", max_quit), UVM_NONE);
       uvm_string_split(max_quit, ",", split_max_quit);
       tmp = split_max_quit[0];
-      i = $sscanf(tmp,"%d", max_quit_int);           
+      i = $sscanf(tmp,"%d", max_quit_int);
       case(split_max_quit[1])
         "YES"   : begin
           srvr.set_max_quit_count(max_quit_int, 1);
@@ -1251,16 +1083,16 @@ endfunction
 function void uvm_root::m_check_verbosity();
 
   int    verbosity = UVM_MEDIUM;
-  
+
   uvm_cmdline_verbosity::init(this);
   uvm_cmdline_verbosity::check(this);
-  
+
   if (uvm_cmdline_verbosity::settings.size() > 0) begin
-    
+
     verbosity = uvm_cmdline_verbosity::settings[0].verbosity;
   end
 
-  
+
   set_report_verbosity_level_hier(verbosity);
 
 endfunction
@@ -1296,7 +1128,7 @@ endtask
 // Debug accessor methods to access enable_print_topology
 function void uvm_root::set_enable_print_topology  (bit enable);
     enable_print_topology = enable;
-    
+
 endfunction
 
 // Debug accessor methods to access enable_print_topology

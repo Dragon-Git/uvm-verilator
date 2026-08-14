@@ -4,7 +4,7 @@
 // Copyright 2012 Accellera Systems Initiative
 // Copyright 2007-2018 Cadence Design Systems, Inc.
 // Copyright 2007-2018 Mentor Graphics Corporation
-// Copyright 2015-2024 NVIDIA Corporation
+// Copyright 2015-2026 NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -26,8 +26,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/base/uvm_domain.svh $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -155,6 +155,19 @@ class uvm_domain extends uvm_phase;
   endfunction
 
 
+  // Function: find_common_phase
+  //
+  // Returns the phase node in the "common" domain which corresponds to
+  // ~phase~, or ~null~ if no such node exists.
+  //
+  // @uvm-contrib For potential contribution to 1800.2
+  static function uvm_phase find_common_phase(uvm_phase phase);
+    uvm_domain domain;
+    domain = get_common_domain();
+    return domain.find(phase);
+  endfunction
+
+
 
   // @uvm-ieee 1800.2-2020 auto 9.4.2.3
   static function void add_uvm_phases(uvm_phase schedule);
@@ -189,6 +202,19 @@ class uvm_domain extends uvm_phase;
         m_uvm_domain.add(m_uvm_schedule);
       end
     return m_uvm_domain;
+  endfunction
+
+
+  // Function: find_run_time_phase
+  //
+  // Returns the phase node in the "UVM" run-time domain which corresponds
+  // to ~phase~, or ~null~ if no such node exists.
+  //
+  // @uvm-contrib For potential contribution to 1800.2
+  static function uvm_phase find_run_time_phase(uvm_phase phase);
+    uvm_domain domain;
+    domain = get_uvm_domain();
+    return domain.find(phase);
   endfunction
 
 

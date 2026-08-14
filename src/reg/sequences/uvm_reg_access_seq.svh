@@ -2,8 +2,9 @@
 // -------------------------------------------------------------
 // Copyright 2010 AMD
 // Copyright 2010-2018 Cadence Design Systems, Inc.
+// Copyright 2025 Marvell International Ltd.
 // Copyright 2010-2011 Mentor Graphics Corporation
-// Copyright 2015-2024 NVIDIA Corporation
+// Copyright 2015-2026 NVIDIA Corporation
 // Copyright 2020 Semifore
 // Copyright 2004-2010 Synopsys, Inc.
 //    All Rights Reserved Worldwide
@@ -28,8 +29,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/reg/sequences/uvm_reg_access_seq.svh $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -306,18 +307,11 @@ class uvm_reg_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item)
    endtask: do_block
 
 
-   // Task -- NODOCS -- reset_blk
+   // Task: reset_blk
    //
-   // Reset the DUT that corresponds to the specified block abstraction class.
+   // User hook that is currently empty.  This is called automatically just before the model is reset, giving the user an opportunity to reset the DUT.
    //
-   // Currently empty.
-   // Will rollback the environment's phase to the ~reset~
-   // phase once the new phasing is available.
-   //
-   // In the meantime, the DUT should be reset before executing this
-   // test sequence or this method should be implemented
-   // in an extension to reset the DUT.
-   //
+   // @uvm-contrib For potential contribution to 1800.2
    virtual task reset_blk(uvm_reg_block blk);
    endtask
 

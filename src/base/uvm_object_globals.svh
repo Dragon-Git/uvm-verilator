@@ -5,7 +5,7 @@
 // Copyright 2012-2018 Cisco Systems, Inc.
 // Copyright 2020-2022 Marvell International Ltd.
 // Copyright 2007-2014 Mentor Graphics Corporation
-// Copyright 2013-2024 NVIDIA Corporation
+// Copyright 2013-2026 NVIDIA Corporation
 // Copyright 2014 Semifore
 // Copyright 2010-2014 Synopsys, Inc.
 // Copyright 2020 Verific
@@ -31,8 +31,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/base/uvm_object_globals.svh $
-// $Rev:      2024-07-18 12:43:22 -0700 $
-// $Hash:     c114e948eeee0286b84392c4185deb679aac54b3 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -692,15 +692,15 @@ parameter UVM_FILE UVM_STDERR = 32'h8000_0002;
 // @uvm-ieee 1800.2-2020 manual F.2.10
 typedef enum {
     UVM_CORE_UNINITIALIZED,
-        UVM_CORE_PRE_INIT,
-        UVM_CORE_INITIALIZING,
+    UVM_CORE_PRE_INIT,
+    UVM_CORE_INITIALIZING,
     UVM_CORE_INITIALIZED, // UVM_CORE_POST_INIT
     UVM_CORE_PRE_RUN,
     UVM_CORE_RUNNING,
     UVM_CORE_POST_RUN,
     UVM_CORE_FINISHED,
     UVM_CORE_PRE_ABORT,
-    UVM_CORE_ABORTED    
+    UVM_CORE_ABORTED
 } uvm_core_state;
 
 // Used to indicate a strict name vs. regex name lookup in apply_config_settings
@@ -709,8 +709,11 @@ typedef struct {
   string       regex;
 } uvm_acs_name_struct;
 
-// we use a queue here only to avoid any problems on writing to variables
-// inside an always_comb/latch/ff in case those call UVM
+// The rules for always_comb/latch/ff state that they need exclusive WRITE access
+// to any variable they write.  Since the core state could be initialized via a 
+// static accessor, e.g. uvm_root::get(), we need to ensure that such blocks don't 
+// cause problems.  A queue is used here because queue.push_back() apparently 
+// doesn't count as a write (?).
 uvm_core_state m_uvm_core_state[$];
 parameter uvm_core_state UVM_CORE_POST_INIT = UVM_CORE_INITIALIZED;
 

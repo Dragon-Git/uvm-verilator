@@ -4,7 +4,8 @@
 // Copyright 2010-2018 Cadence Design Systems, Inc.
 // Copyright 2022 Marvell International Ltd.
 // Copyright 2020 Mentor Graphics Corporation
-// Copyright 2014-2024 NVIDIA Corporation
+// Copyright 2026 Microsoft
+// Copyright 2014-2026 NVIDIA Corporation
 // Copyright 2014-2022 Semifore
 // Copyright 2004-2011 Synopsys, Inc.
 //    All Rights Reserved Worldwide
@@ -29,8 +30,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/reg/uvm_reg_predictor.svh $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-06-10 09:59:36 -0700 $
+// $Hash:     d69bd29b12f83a7fb6866ad5fd1247d0968f1bca $
 //
 //----------------------------------------------------------------------
 
@@ -191,6 +192,7 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
          item.set_map(map);
          item.set_kind(rw.kind);
          item.set_status(rw.status);
+         item.set_value(0, 0);
          predict_info.reg_item = item;
          m_pending[rg] = predict_info;
        end

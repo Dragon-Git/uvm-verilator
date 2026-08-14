@@ -8,7 +8,7 @@ Note that the uvm_compat_pkg provides compatibility by enabling code based on di
 
 # Kit version
 
-This version of the compatibility package was distributed with 1800.2 2020.3.1.
+This version of the compatibility package was distributed with 1800.2 2020.3.2.
 
 # License
 
@@ -73,6 +73,6 @@ The following information may be used for tracking the version of this file.  Pl
 
 ```
 $File:     compat/README.md $
-$Rev:      2024-08-22 11:25:40 -0700 $
-$Hash:     2f4242f2c7d7a4f69948682895557eb89e24c414 $
+$Rev:      2026-06-10 10:00:57 -0700 $
+$Hash:     7b2dda610b341f455154c688c6dc94808645090e $
 ```

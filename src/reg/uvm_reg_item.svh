@@ -4,7 +4,8 @@
 // Copyright 2010-2018 Cadence Design Systems, Inc.
 // Copyright 2022 Marvell International Ltd.
 // Copyright 2010-2020 Mentor Graphics Corporation
-// Copyright 2014-2024 NVIDIA Corporation
+// Copyright 2026 Microsoft
+// Copyright 2014-2026 NVIDIA Corporation
 // Copyright 2004-2018 Synopsys, Inc.
 //    All Rights Reserved Worldwide
 //
@@ -28,8 +29,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/reg/uvm_reg_item.svh $
-// $Rev:      2024-02-26 14:05:42 -0800 $
-// $Hash:     798b28d37d7fa808e18c64153f2b40baed27a5d1 $
+// $Rev:      2026-06-10 09:59:36 -0700 $
+// $Hash:     d69bd29b12f83a7fb6866ad5fd1247d0968f1bca $
 //
 //----------------------------------------------------------------------
 
@@ -557,7 +558,7 @@ typedef struct {
 
 
 
-  uvm_reg_data_t data;
+  uvm_reg_data_t data=0;
 
 
 

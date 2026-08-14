@@ -6,7 +6,8 @@
 // Copyright 2020-2022 Intel Corporation
 // Copyright 2020-2022 Marvell International Ltd.
 // Copyright 2010-2020 Mentor Graphics Corporation
-// Copyright 2014-2024 NVIDIA Corporation
+// Copyright 2026 Microsoft
+// Copyright 2014-2026 NVIDIA Corporation
 // Copyright 2018 Qualcomm, Inc.
 // Copyright 2012-2022 Semifore
 // Copyright 2004-2018 Synopsys, Inc.
@@ -32,8 +33,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/reg/uvm_reg_field.svh $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-06-10 09:59:36 -0700 $
+// $Hash:     d69bd29b12f83a7fb6866ad5fd1247d0968f1bca $
 //
 //----------------------------------------------------------------------
 
@@ -103,7 +104,7 @@ class uvm_reg_field extends uvm_object;
                                   uvm_reg_data_t reset,
                                   bit            has_reset,
                                   bit            is_rand,
-                                  bit            individually_accessible); 
+                                  bit            individually_accessible);
 
 
    //---------------------
@@ -141,20 +142,20 @@ class uvm_reg_field extends uvm_object;
    // Returns the index of the least significant bit of the field
    // in the register that instantiates it.
    // An offset of 0 indicates a field that is aligned with the
-   // least-significant bit of the register. 
+   // least-significant bit of the register.
    //
    extern virtual function int unsigned get_lsb_pos();
 
 
    // Function -- NODOCS -- get_n_bits
    //
-   // Returns the width, in number of bits, of the field. 
+   // Returns the width, in number of bits, of the field.
    //
    extern virtual function int unsigned get_n_bits();
 
    //
    // FUNCTION -- NODOCS -- get_max_size
-   // Returns the width, in number of bits, of the largest field. 
+   // Returns the width, in number of bits, of the largest field.
    //
    extern static function int unsigned get_max_size();
 
@@ -179,7 +180,7 @@ class uvm_reg_field extends uvm_object;
    extern static function bit define_access(string name);
    local static bit m_predefined = m_predefine_policies();
    extern local static function bit m_predefine_policies();
- 
+
    // Function -- NODOCS -- get_access
    //
    // Get the access policy of the field
@@ -212,7 +213,7 @@ class uvm_reg_field extends uvm_object;
 
    // @uvm-ieee 1800.2-2020 auto 18.5.4.10
    extern virtual function bit is_volatile();
-   
+
    // Function -- NODOCS -- get_field_by_full_name
    //
    // Finds a field with the specified full hierarchical name.
@@ -221,7 +222,7 @@ class uvm_reg_field extends uvm_object;
    // The function looks up the cached registry built after register model is locked
    //
    // If no field is found, returns ~null~.
-   
+
    static function uvm_reg_field get_field_by_full_name(string name);
       return m_reg_field_registry[name];
    endfunction
@@ -299,7 +300,7 @@ class uvm_reg_field extends uvm_object;
                               input  uvm_object         extension = null,
                               input  string             fname = "",
                               input  int                lineno = 0);
-               
+
 
 
    // @uvm-ieee 1800.2-2020 auto 18.5.5.11
@@ -321,7 +322,7 @@ class uvm_reg_field extends uvm_object;
                               input  uvm_object         extension = null,
                               input  string             fname = "",
                               input  int                lineno = 0);
-               
+
 
 
    // @uvm-ieee 1800.2-2020 auto 18.5.5.13
@@ -345,7 +346,7 @@ class uvm_reg_field extends uvm_object;
    // @uvm-ieee 1800.2-2020 auto 18.5.5.14
    extern function uvm_check_e get_compare();
 
-   
+
 
    // @uvm-ieee 1800.2-2020 auto 18.5.5.16
    extern function bit is_indv_accessible (uvm_door_e  path,
@@ -371,14 +372,14 @@ class uvm_reg_field extends uvm_object;
 
    /*local*/
    extern virtual function uvm_reg_data_t XupdateX();
-  
+
    /*local*/
    extern function bit Xcheck_accessX (input uvm_reg_item rw,
                                        output uvm_reg_map_info map_info);
 
    extern virtual task do_write(uvm_reg_item rw);
    extern virtual task do_read(uvm_reg_item rw);
-   extern virtual function void do_predict 
+   extern virtual function void do_predict
                                   (uvm_reg_item rw,
                                    uvm_predict_e kind=UVM_PREDICT_DIRECT,
                                    uvm_reg_byte_en_t be = -1);
@@ -449,7 +450,7 @@ function void uvm_reg_field::configure(uvm_reg        parent,
                                        uvm_reg_data_t reset,
                                        bit            has_reset,
                                        bit            is_rand,
-                                       bit            individually_accessible); 
+                                       bit            individually_accessible);
    m_parent = parent;
    if (size == 0) begin
      `uvm_error("RegModel",
@@ -466,8 +467,14 @@ function void uvm_reg_field::configure(uvm_reg        parent,
    m_check     = volatile ? UVM_NO_CHECK : UVM_CHECK;
    m_individually_accessible = individually_accessible;
 
+
+   m_desired &= ((1 << m_size)-1);
+   value &= ((1 << m_size)-1);
+   m_mirrored &= ((1 << m_size)-1);
+
+
    if (has_reset) begin
-      
+
      set_reset(reset);
    end
 
@@ -481,11 +488,11 @@ function void uvm_reg_field::configure(uvm_reg        parent,
    end
 
    if (size > m_max_size) begin
-      
+
      m_max_size = size;
    end
 
-   
+
    // Ignore is_rand if the field is known not to be writeable
    // i.e. not "RW", "WRC", "WRS", "WO", "W1", "WO1"
    case (access)
@@ -499,7 +506,7 @@ function void uvm_reg_field::configure(uvm_reg        parent,
    endcase
 
    if (!is_rand) begin
-     
+
      set_rand_mode(0);
    end
 
@@ -572,7 +579,7 @@ function string uvm_reg_field::get_access(uvm_reg_map map = null);
    string field_access = m_access;
 
    if (map == uvm_reg_map::backdoor()) begin
-     
+
      return field_access;
    end
 
@@ -581,13 +588,13 @@ function string uvm_reg_field::get_access(uvm_reg_map map = null);
    case (m_parent.get_rights(map))
      "RW": begin
        // No restrictions
-       
+
        return field_access;
      end
 
 
      "RO": begin
-       
+
        case (field_access)
          "RW", "RO", "WC", "WS",
          "W1C", "W1S", "W1T", "W0C", "W0S", "W0T",
@@ -596,19 +603,19 @@ function string uvm_reg_field::get_access(uvm_reg_map map = null);
            field_access = "RO";
          end
 
-        
+
          "RC", "WRC", "W1SRC", "W0SRC", "WSRC"
          : begin
            field_access = "RC";
          end
 
-        
+
          "RS", "WRS", "W1CRS", "W0CRS", "WCRS"
          : begin
            field_access = "RS";
          end
 
-        
+
          "WO", "WOC", "WOS", "WO1": begin
            field_access = "NOACCESS";
          end
@@ -619,7 +626,7 @@ function string uvm_reg_field::get_access(uvm_reg_map map = null);
 
 
      "WO": begin
-       
+
        case (field_access)
          "RW","WRC","WRS" : begin
            field_access = "WO";
@@ -663,13 +670,13 @@ function string uvm_reg_field::get_access(uvm_reg_map map = null);
 
          // No change for the other modes
          //         "WO","WC","WS","W1C","W1S","W0C","W0S","W0T","W1" : null;
-         
+
        endcase
      end
 
 
      default: begin
-       
+
        field_access = "NOACCESS";
        `uvm_warning("RegModel", {"Register '",m_parent.get_full_name(),
        "' containing field '",get_name(),"' is mapped in map '",
@@ -697,14 +704,15 @@ endfunction: set_access
 
 function void uvm_reg_field::set_rand_mode(bit rand_mode);
     value.rand_mode(rand_mode);
-endfunction: set_rand_mode   
+    uvm_reg_field_valid.constraint_mode(rand_mode);
+endfunction: set_rand_mode
 
 
 // get_rand_mode
 
 function bit uvm_reg_field::get_rand_mode();
     return bit'(value.rand_mode());
-endfunction: get_rand_mode 
+endfunction: get_rand_mode
 
 
 // define_access
@@ -736,7 +744,7 @@ function bit uvm_reg_field::m_predefine_policies();
 
 
    m_predefined = 1;
-   
+
    void'(define_access("RO"));
    void'(define_access("RW"));
    void'(define_access("RC"));
@@ -786,7 +794,8 @@ function uvm_reg_data_t uvm_reg_field::XpredictX (uvm_reg_data_t cur_val,
                                                   uvm_reg_data_t wr_val,
                                                   uvm_reg_map    map);
    uvm_reg_data_t mask = ('b1 << m_size)-1;
-   
+   cur_val &= mask;
+   wr_val &= mask;
    case (get_access(map))
      "RO":    begin
        return cur_val;
@@ -929,18 +938,18 @@ endfunction: predict
 function void uvm_reg_field::do_predict(uvm_reg_item      rw,
                                         uvm_predict_e     kind = UVM_PREDICT_DIRECT,
                                         uvm_reg_byte_en_t be = -1);
-   
+
    uvm_reg_data_t field_val = rw.get_value(0) & ((1 << m_size)-1);
 
    if (rw.get_status() != UVM_NOT_OK) begin
-     
+
      rw.set_status(UVM_IS_OK);
    end
 
 
    // Assume that the entire field is enabled
    if (!be[0]) begin
-     
+
      return;
    end
 
@@ -951,11 +960,11 @@ function void uvm_reg_field::do_predict(uvm_reg_item      rw,
    case (kind)
 
      UVM_PREDICT_WRITE: begin
-       
+
        uvm_reg_field_cb_iter cbs = new(this);
 
        if (rw.get_door() == UVM_FRONTDOOR || rw.get_door() == UVM_PREDICT) begin
-            
+
          field_val = XpredictX(m_mirrored, field_val, rw.get_map());
        end
 
@@ -963,8 +972,8 @@ function void uvm_reg_field::do_predict(uvm_reg_item      rw,
        m_written = 1;
 
        for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next()) begin
-            
-         cb.post_predict(this, m_mirrored, field_val, 
+
+         cb.post_predict(this, m_mirrored, field_val,
                             UVM_PREDICT_WRITE, rw.get_door(), rw.get_map());
        end
 
@@ -974,7 +983,7 @@ function void uvm_reg_field::do_predict(uvm_reg_item      rw,
      end
 
      UVM_PREDICT_READ: begin
-       
+
        uvm_reg_field_cb_iter cbs = new(this);
 
        if (rw.get_door() == UVM_FRONTDOOR || rw.get_door() == UVM_PREDICT) begin
@@ -986,7 +995,7 @@ function void uvm_reg_field::do_predict(uvm_reg_item      rw,
          acc == "WSRC" ||
          acc == "W1SRC" ||
          acc == "W0SRC") begin
-              
+
            field_val = 0;
          end
          // (clear)
@@ -996,7 +1005,7 @@ function void uvm_reg_field::do_predict(uvm_reg_item      rw,
          acc == "WCRS" ||
          acc == "W1CRS" ||
          acc == "W0CRS") begin
-              
+
            field_val = ('b1 << m_size)-1;
          end
          // all 1's (set)
@@ -1006,14 +1015,14 @@ function void uvm_reg_field::do_predict(uvm_reg_item      rw,
          acc == "WOS" ||
          acc == "WO1" ||
          acc == "NOACCESS") begin
-              
+
            return;
          end
 
        end
 
        for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next()) begin
-            
+
          cb.post_predict(this, m_mirrored, field_val,
                             UVM_PREDICT_READ, rw.get_door(), rw.get_map());
        end
@@ -1024,7 +1033,7 @@ function void uvm_reg_field::do_predict(uvm_reg_item      rw,
      end
 
      UVM_PREDICT_DIRECT: begin
-       
+
        if (m_parent.is_busy()) begin
          `uvm_warning("RegModel", {"Trying to predict value of field '",
          get_name(),"' while register '",m_parent.get_full_name(),
@@ -1153,10 +1162,10 @@ function uvm_reg_data_t  uvm_reg_field::XupdateX();
      default: begin
        XupdateX = m_desired;
      end
-      
+
    endcase
    XupdateX &= (1 << m_size) - 1;
-   
+
 endfunction: XupdateX
 
 
@@ -1169,7 +1178,14 @@ function void uvm_reg_field::set(uvm_reg_data_t  value,
 
    m_fname = fname;
    m_lineno = lineno;
-   if (value >> m_size) begin
+   // Check for unknown bits in value greater than field
+   if ($isunknown(value >> m_size)) begin
+     `uvm_warning("RegModel",
+     $sformatf("Specified value (0x%h) has unknown bits that can allow for a value greater than field \"%s\" size (%0d bits)",
+     value, get_name(), m_size))
+     value &= mask;
+   end
+   else if (value >> m_size) begin
      `uvm_warning("RegModel",
      $sformatf("Specified value (0x%h) greater than field \"%s\" size (%0d bits)",
      value, get_name(), m_size))
@@ -1288,20 +1304,21 @@ function void uvm_reg_field::set(uvm_reg_data_t  value,
      end
 
    endcase
+   m_desired &= ((1 << m_size)-1);
    this.value = m_desired;
 endfunction: set
 
- 
+
 // get
 
 function uvm_reg_data_t  uvm_reg_field::get(string  fname = "",
                                             int     lineno = 0);
    m_fname = fname;
    m_lineno = lineno;
-   get = m_desired;
+   get = m_desired & ((1 << m_size)-1);
 endfunction: get
 
- 
+
 // get_mirrored_value
 
 function uvm_reg_data_t  uvm_reg_field::get_mirrored_value(string  fname = "",
@@ -1311,7 +1328,7 @@ function uvm_reg_data_t  uvm_reg_field::get_mirrored_value(string  fname = "",
    end
    m_fname = fname;
    m_lineno = lineno;
-   get_mirrored_value = m_mirrored;
+   get_mirrored_value = m_mirrored & ((1 << m_size)-1);
 endfunction: get_mirrored_value
 
 
@@ -1320,17 +1337,17 @@ endfunction: get_mirrored_value
 function void uvm_reg_field::reset(string kind = "HARD");
 
    if (!m_reset.exists(kind)) begin
-      
+
      return;
    end
 
-   
+
    m_mirrored = m_reset[kind];
    m_desired  = m_mirrored;
    value      = m_mirrored;
 
    if (kind == "HARD") begin
-      
+
      m_written  = 0;
    end
 
@@ -1363,8 +1380,8 @@ function uvm_reg_data_t
    uvm_reg_field::get_reset(string kind = "HARD");
 
    if (!m_reset.exists(kind)) begin
-      
-     return m_desired;
+
+     return m_desired & ((1 << m_size)-1);
    end
 
 
@@ -1385,11 +1402,11 @@ endfunction: set_reset
 
 function bit uvm_reg_field::needs_update();
    if (get_access() inside {"RO","RC","RS"}) begin
-       
+
      return 0;
    end
 
-   needs_update = (m_mirrored != m_desired) | m_volatile;
+   needs_update = (m_mirrored !== m_desired) | m_volatile;
 endfunction: needs_update
 
 
@@ -1401,7 +1418,7 @@ typedef class uvm_reg_map_info;
 function bit uvm_reg_field::Xcheck_accessX(input uvm_reg_item rw,
                                            output uvm_reg_map_info map_info);
   uvm_reg_map local_tmp_map;
-                        
+
    if (rw.get_door() == UVM_DEFAULT_DOOR) begin
      uvm_reg_block blk = m_parent.get_block();
      rw.set_door(blk.get_default_door());
@@ -1415,19 +1432,19 @@ function bit uvm_reg_field::Xcheck_accessX(input uvm_reg_item rw,
        rw.set_door(UVM_FRONTDOOR);
      end
      else begin
-        
+
        rw.set_map(uvm_reg_map::backdoor());
      end
 
    end
 
    if (rw.get_door() != UVM_BACKDOOR) begin
-     
+
      rw.set_local_map(m_parent.get_local_map(rw.get_map()));
 
-     if (rw.get_local_map() == null) begin        
+     if (rw.get_local_map() == null) begin
        local_tmp_map = rw.get_map();
-       `uvm_error(get_type_name(), 
+       `uvm_error(get_type_name(),
        {"No transactor available to physically access memory from map '",
        local_tmp_map.get_full_name(),"'"})
        rw.set_status(UVM_NOT_OK);
@@ -1447,7 +1464,7 @@ function bit uvm_reg_field::Xcheck_accessX(input uvm_reg_item rw,
      end
 
      if (rw.get_map() == null) begin
-       
+
        rw.set_map(rw.get_local_map());
      end
 
@@ -1470,9 +1487,9 @@ task uvm_reg_field::write(output uvm_status_e       status,
                           input  int                lineno = 0);
 
    uvm_reg_item rw;
-    
+
    set(value);
-    
+
    rw = uvm_reg_item::type_id::create("field_write_item",,get_full_name());
    rw.set_element(this);
    rw.set_element_kind(UVM_FIELD);
@@ -1497,7 +1514,7 @@ endtask
 
 task uvm_reg_field::do_write(uvm_reg_item rw);
 
-   uvm_reg_data_t   value_adjust;
+   uvm_reg_data_t   value_adjust=0;
    uvm_reg_map_info map_info;
    uvm_reg_field    fields[$];
    bit bad_side_effect;
@@ -1513,7 +1530,16 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
 
    m_write_in_progress = 1'b1;
 
-   if (rw.get_value(0) >> m_size) begin
+   // Check for unknown bits in value greater than field
+   if ($isunknown(rw.get_value(0) >> m_size)) begin
+     uvm_reg_data_t tmp_value;
+     `uvm_warning("RegModel", {"uvm_reg_field::write(): Has unknown bits that can allow for a value greater than field '",
+     get_full_name(),"'"})
+     tmp_value = rw.get_value(0);
+     tmp_value &= ((1<<m_size)-1);
+     rw.set_value(tmp_value, 0);
+   end
+   else if (rw.get_value(0) >> m_size) begin
      uvm_reg_data_t tmp_value;
      `uvm_warning("RegModel", {"uvm_reg_field::write(): Value greater than field '",
      get_full_name(),"'"})
@@ -1536,7 +1562,7 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
        // These...
        "RO", "RC", "RS", "W1C", "W1S", "W1T", "W1SRC", "W1CRC": begin
          // Use all 0's
-          
+
          value_adjust |= 0;
        end
 
@@ -1544,20 +1570,20 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
        // These...
        "W0C", "W0S", "W0T", "W0SRC", "W0CRS": begin
          // Use all 1's
-          
+
          value_adjust |= ((1<<fields[i].get_n_bits())-1) << fields[i].get_lsb_pos();
        end
 
 
        // These might have side effects! Bad!
        "WC", "WS", "WCRS", "WSRC", "WOC", "WOS": begin
-           
+
          bad_side_effect = 1;
        end
 
 
        default: begin
-           
+
          value_adjust |= fields[i].m_mirrored << fields[i].get_lsb_pos();
        end
 
@@ -1569,8 +1595,8 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
    rw.set_element_kind(UVM_REG);
    rw.set_element(m_parent);
    rw.set_value(value_adjust, 0);
-   m_parent.do_write(rw);   
-`else        
+   m_parent.do_write(rw);
+`else
 
    if (!is_indv_accessible(rw.get_door(),rw.get_local_map())) begin
      rw.set_element_kind(UVM_REG);
@@ -1590,10 +1616,10 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
      m_parent.Xset_busyX(1);
 
      rw.set_status(UVM_IS_OK);
-      
+
      pre_write(rw);
      for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next()) begin
-        
+
        cb.pre_write(rw);
      end
 
@@ -1602,28 +1628,28 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
        m_write_in_progress = 1'b0;
        m_parent.Xset_busyX(0);
        m_parent.XatomicX(0);
-        
+
        return;
      end
-            
+
      item_map.do_write(rw);
 
      if (system_map.get_auto_predict()) begin
        // ToDo: Call parent.XsampleX();
-        
+
        do_predict(rw, UVM_PREDICT_WRITE);
      end
 
 
      post_write(rw);
      for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next()) begin
-        
+
        cb.post_write(rw);
      end
 
 
      m_parent.Xset_busyX(0);
-      
+
    end
 
 `endif
@@ -1675,20 +1701,20 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
    uvm_reg_map_info map_info;
    uvm_reg_map rw_local_map;
    bit bad_side_effect;
-   
+
    m_parent.XatomicX(1);
    m_fname  = rw.get_fname();
    m_lineno = rw.get_line();
    m_read_in_progress = 1'b1;
-  
+
    if (!Xcheck_accessX(rw,map_info)) begin
-     
+
      return;
    end
 
-   
+
    rw_local_map = rw.get_local_map();
-   
+
 `ifdef UVM_REG_NO_INDIVIDUAL_FIELD_ACCESS
    rw.set_element_kind(UVM_REG);
    rw.set_element(m_parent);
@@ -1714,10 +1740,10 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
      m_parent.Xset_busyX(1);
 
      rw.set_status(UVM_IS_OK);
-      
+
      pre_read(rw);
      for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next()) begin
-        
+
        cb.pre_read(rw);
      end
 
@@ -1729,26 +1755,26 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
 
        return;
      end
-            
+
      rw_local_map.do_read(rw);
 
 
      if (system_map.get_auto_predict()) begin
        // ToDo: Call parent.XsampleX();
-        
+
        do_predict(rw, UVM_PREDICT_READ);
      end
 
 
      post_read(rw);
      for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next()) begin
-        
+
        cb.post_read(rw);
      end
 
 
      m_parent.Xset_busyX(0);
-      
+
    end
 
 `endif
@@ -1762,7 +1788,7 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
      foreach (fields[i]) begin
        string mode;
        if (fields[i] == this) begin
-            
+
          continue;
        end
 
@@ -1785,7 +1811,7 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
    end
 
 endtask: do_read
-               
+
 
 // is_indv_accessible
 
@@ -1814,12 +1840,12 @@ function bit uvm_reg_field::is_indv_accessible(uvm_door_e  path,
      get_name(), "' because register '", m_parent.get_full_name(), "' has a user-defined front-door. Accessing complete register instead."})
      return 0;
    end
-   
+
    begin
      uvm_reg_map system_map = local_map.get_root_map();
      uvm_reg_adapter adapter = system_map.get_adapter();
      if ((adapter != null) && !adapter.supports_byte_enable) begin
-       `uvm_warning("RegModel", 
+       `uvm_warning("RegModel",
        {"Target bus does not support byte enable, field '", get_full_name(),
        ". Accessing complete register instead."})
        return 0;
@@ -1837,8 +1863,8 @@ function bit uvm_reg_field::is_indv_accessible(uvm_door_e  path,
        return 1;
      end
      else begin
-       int prev_lsb,this_lsb,next_lsb; 
-       int prev_sz,this_sz,next_sz; 
+       int prev_lsb,this_lsb,next_lsb;
+       int prev_sz,this_sz,next_sz;
        int bus_sz = bus_width*8;
 
        foreach (fields[i]) begin
@@ -1865,7 +1891,7 @@ function bit uvm_reg_field::is_indv_accessible(uvm_door_e  path,
        if (fld_idx == 0 &&
        ((next_lsb % bus_sz) == 0 ||
        (next_lsb - this_sz) > (next_lsb % bus_sz))) begin
-           
+
          return 1;
        end
 
@@ -1874,7 +1900,7 @@ function bit uvm_reg_field::is_indv_accessible(uvm_door_e  path,
        else if (fld_idx == (fields.size()-1) &&
        ((this_lsb % bus_sz) == 0 ||
        (this_lsb - (prev_lsb + prev_sz)) >= (this_lsb % bus_sz))) begin
-           
+
          return 1;
        end
 
@@ -1884,15 +1910,15 @@ function bit uvm_reg_field::is_indv_accessible(uvm_door_e  path,
          if ((this_lsb % bus_sz) == 0) begin
            if ((next_lsb % bus_sz) == 0 ||
            (next_lsb - (this_lsb + this_sz)) >= (next_lsb % bus_sz)) begin
-                  
+
              return 1;
            end
 
-         end 
+         end
          else begin
            if ( (next_lsb - (this_lsb + this_sz)) >= (next_lsb % bus_sz) &&
            ((this_lsb - (prev_lsb + prev_sz)) >= (this_lsb % bus_sz)) ) begin
-                 
+
              return 1;
            end
 
@@ -1900,8 +1926,8 @@ function bit uvm_reg_field::is_indv_accessible(uvm_door_e  path,
        end
      end
    end
-   
-   `uvm_warning("RegModel", 
+
+   `uvm_warning("RegModel",
        {"Field '", get_full_name(),"' is not the only field within the entire bus width. ",
        "Individual field access will not be available. ",
        "Accessing complete register instead."})
@@ -1924,8 +1950,13 @@ task uvm_reg_field::poke(output uvm_status_e      status,
 
    m_fname = fname;
    m_lineno = lineno;
-
-   if (value >> m_size) begin
+   if ($isunknown(value >> m_size)) begin
+     `uvm_warning("RegModel",
+     {"uvm_reg_field::poke(): Has unknown bits that can allow for a value that exceeds size of field '",
+     get_name(),"'"})
+     value &= value & ((1<<m_size)-1);
+   end
+   else if (value >> m_size) begin
      `uvm_warning("RegModel",
      {"uvm_reg_field::poke(): Value exceeds size of field '",
      get_name(),"'"})
@@ -1977,7 +2008,7 @@ task uvm_reg_field::peek(output uvm_status_e      status,
    value = (reg_value >> m_lsb) & ((1<<m_size))-1;
 
 endtask: peek
-               
+
 
 // mirror
 
@@ -2051,24 +2082,24 @@ function string uvm_reg_field::convert2string();
             reg_.get_name(),
             get_lsb_pos() + get_n_bits() - 1,
             get_lsb_pos(), m_desired,
-            (m_desired != m_mirrored) ? $sformatf({" (Mirror: ",fmt,")"},
-               m_mirrored) : ""); 
+            (m_desired !== m_mirrored) ? $sformatf({" (Mirror: ",fmt,")"},
+               m_mirrored) : "");
 
    if (m_read_in_progress == 1'b1) begin
      if (m_fname != "" && m_lineno != 0) begin
-         
+
        $sformat(res_str, " from %s:%0d",m_fname, m_lineno);
      end
 
-     convert2string = {convert2string, "\n", "currently being read", res_str}; 
+     convert2string = {convert2string, "\n", "currently being read", res_str};
    end
    if (m_write_in_progress == 1'b1) begin
      if (m_fname != "" && m_lineno != 0) begin
-         
+
        $sformat(res_str, " from %s:%0d",m_fname, m_lineno);
      end
 
-     convert2string = {convert2string, "\n", res_str, "currently being written"}; 
+     convert2string = {convert2string, "\n", res_str, "currently being written"};
    end
 endfunction: convert2string
 

@@ -6,7 +6,7 @@
 // Copyright 2014 Intel Corporation
 // Copyright 2020-2022 Marvell International Ltd.
 // Copyright 2007-2018 Mentor Graphics Corporation
-// Copyright 2013-2024 NVIDIA Corporation
+// Copyright 2013-2026 NVIDIA Corporation
 // Copyright 2018 Qualcomm, Inc.
 // Copyright 2014 Semifore
 // Copyright 2018 Synopsys, Inc.
@@ -31,8 +31,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/base/uvm_printer.svh $
-// $Rev:      2024-07-18 12:43:22 -0700 $
-// $Hash:     c114e948eeee0286b84392c4185deb679aac54b3 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -369,9 +369,6 @@ protected function m_uvm_printer_knobs get_knobs() ; return knobs; endfunction
   extern  function string index_string (int index, string name="");
 
   string m_string;
-
-  // @uvm-compat provided for compatibility with 1.2
-  extern function string get_radix_str(uvm_radix_enum radix);
 
 endclass
 
@@ -793,6 +790,54 @@ class m_uvm_printer_knobs;
   bit footer = 1;
   //@uvm-compat provided for compatibility with 1.2
   bit full_name = 0;
+
+  //@uvm-compat provided for compatibility with 1.2
+  int max_width = 999;
+  //@uvm-compat provided for compatibility with 1.2
+  string truncation = "+";
+  //@uvm-compat provided for compatibility with 1.2
+  int name_width = -1;
+  //@uvm-compat provided for compatibility with 1.2
+  int type_width = -1;
+  //@uvm-compat provided for compatibility with 1.2
+  int size_width = -1;
+  //@uvm-compat provided for compatibility with 1.2
+  int value_width = -1;
+  //@uvm-compat provided for compatibility with 1.2
+  bit sprint = 1;
+
+  //@uvm-compat provided for compatibility with 1.2
+  function string get_radix_str(uvm_radix_enum radix);
+    if(show_radix == 0) begin
+      return "";
+    end
+
+    if(radix == UVM_NORADIX) begin
+      radix = default_radix;
+    end
+
+    if(radix == UVM_DEC) begin
+      return dec_radix;
+    end
+
+    else if(radix == UVM_BIN) begin
+      return bin_radix;
+    end
+
+    else if(radix == UVM_OCT) begin
+      return oct_radix;
+    end
+
+    else if(radix == UVM_UNSIGNED) begin
+      return unsigned_radix;
+    end
+
+    else if(radix == UVM_HEX) begin
+      return hex_radix;
+    end
+
+    return "";
+  endfunction
 
 endclass
 
@@ -1232,6 +1277,7 @@ function void uvm_printer::print_object (string name, uvm_object value,
 
   if ((value == null) ||
       (recursion_policy == UVM_REFERENCE) ||
+      (object_printed(value, recursion_policy) == uvm_policy::STARTED) ||
       (get_max_depth() == get_active_object_depth())) begin
     print_object_header(name,value,scope_separator); // calls push_element
     pop_element();
@@ -1867,18 +1913,3 @@ function void uvm_line_printer::flush() ;
    //set_indent(0); // LRM says to include this call
    //set_separators("{}"); // LRM says to include this call
 endfunction
-
-function string uvm_printer::get_radix_str(uvm_radix_enum radix);
-    if(knobs.show_radix == 0) begin
-      
-      return "";
-    end
-
-    if(radix == UVM_NORADIX) begin
-      
-      radix = knobs.default_radix;
-    end
-
-    return get_radix_string(radix);
-endfunction
-

@@ -4,7 +4,7 @@
 // Copyright 2022 Marvell International Ltd.
 // Copyright 2007-2024 Mentor Graphics Corporation
 // Copyright 2024 Microsoft
-// Copyright 2022-2024 NVIDIA Corporation
+// Copyright 2022-2026 NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -26,8 +26,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/base/uvm_phase_hopper.svh $
-// $Rev:      2024-02-08 13:43:04 -0800 $
-// $Hash:     29e1e3f8ee4d4aa2035dba1aba401ce1c19aa340 $
+// $Rev:      2026-02-09 11:33:21 -0800 $
+// $Hash:     dc28b529e931816335151411e086583c6069f172 $
 //
 //----------------------------------------------------------------------
 
@@ -269,7 +269,15 @@ class uvm_phase_hopper extends uvm_object;
   extern virtual function void execute_on(uvm_phase imp,
                                           uvm_component comp,
                                           uvm_phase node);
-  
+
+  // Function: set_phase_state
+  // Sets the state of the specified phase.
+  //
+  // This method sets the state of ~phase~ to ~state~.
+  //
+  // @uvm-contrib For potential contribution to 1800.2
+  extern virtual function void set_phase_state(uvm_phase phase, uvm_phase_state state);
+
   /// Implementation Artifacts
 
   local uvm_phase m_queue[$]; // Internal storage
@@ -399,7 +407,7 @@ task uvm_phase_hopper::schedule_phase(uvm_phase phase, uvm_phase from_phase = nu
   uvm_phase_state prev_state;
   prev_state = phase.get_state();
   if(prev_state < UVM_PHASE_SCHEDULED) begin
-    phase.set_state(UVM_PHASE_SCHEDULED);
+    this.set_phase_state(phase, UVM_PHASE_SCHEDULED);
     wait_for_waiters(phase, prev_state);
     void'(this.try_put(phase));
     `UVM_PH_TRACE("PH/TRC/SCHEDULED",{"Scheduled from ", (from_phase != null) ? {"phase ",from_phase.get_full_name()}:"run_test"},phase,UVM_LOW)
@@ -419,7 +427,7 @@ task uvm_phase_hopper::sync_phase(uvm_phase phase);
 
 
   prev_state = phase.get_state();
-  phase.set_state(UVM_PHASE_SYNCING);
+  this.set_phase_state(phase, UVM_PHASE_SYNCING);
   wait_for_waiters(phase, prev_state);
 
   phase.get_sync_relationships(edges);
@@ -436,7 +444,7 @@ task uvm_phase_hopper::start_phase(uvm_phase phase);
   `UVM_PH_TRACE("PH/TRC/STRT","Starting phase",phase,UVM_LOW)
 
   prev_state = phase.get_state();
-  phase.set_state(UVM_PHASE_STARTED);
+  this.set_phase_state(phase, UVM_PHASE_STARTED);
 
   // Only nodes traverse_on
   if (phase.get_phase_type() == UVM_PHASE_NODE) begin
@@ -452,7 +460,7 @@ endtask : start_phase
 task uvm_phase_hopper::execute_phase(uvm_phase phase);
   uvm_phase_state prev_state;
   prev_state = phase.get_state();
-  phase.set_state(UVM_PHASE_EXECUTING);
+  this.set_phase_state(phase, UVM_PHASE_EXECUTING);
 
   // Only nodes traverse_on
   if (phase.get_phase_type() != UVM_PHASE_NODE) begin
@@ -526,11 +534,11 @@ task uvm_phase_hopper::execute_phase(uvm_phase phase);
               //--------------
               
               while (do_ready_to_end) begin
-                uvm_wait_for_nba_region(); // Let all siblings see no objections before traverse_on might raise another 
+                uvm_wait_for_nba_region(); // Let all siblings see no objections before traverse_on might raise another
                 `UVM_PH_TRACE("PH_READY_TO_END","PHASE READY TO END",phase,UVM_DEBUG)
                 ready_to_end_count++;
                 `UVM_PH_TRACE("PH_READY_TO_END_CB","CALLING READY_TO_END CB",phase,UVM_HIGH)
-                phase.set_state(UVM_PHASE_READY_TO_END);
+                this.set_phase_state(phase, UVM_PHASE_READY_TO_END);
                 if (imp != null) begin
                   
                   traverse_on(imp, null, phase, UVM_PHASE_READY_TO_END);
@@ -656,7 +664,7 @@ task uvm_phase_hopper::end_phase(uvm_phase phase);
     //-------
     // execute 'phase_ended' callbacks
     `UVM_PH_TRACE("PH_END","ENDING PHASE",phase,UVM_HIGH)
-    phase.set_state(UVM_PHASE_ENDED);
+    this.set_phase_state(phase, UVM_PHASE_ENDED);
     if (imp != null) begin
       
       traverse_on(imp, null, phase, UVM_PHASE_ENDED);
@@ -675,14 +683,14 @@ task uvm_phase_hopper::cleanup_phase(uvm_phase phase);
     uvm_phase_state prev_state;
     prev_state = phase.get_state();
     // kill this phase's threads
-    if(phase.m_premature_end) begin 
-      
-      phase.set_state(UVM_PHASE_JUMPING);
+    if(phase.m_premature_end) begin
+
+      this.set_phase_state(phase, UVM_PHASE_JUMPING);
     end
 
     else begin
-      
-      phase.set_state(UVM_PHASE_CLEANUP);
+
+      this.set_phase_state(phase, UVM_PHASE_CLEANUP);
     end
 
 
@@ -726,9 +734,9 @@ task uvm_phase_hopper::finish_phase(uvm_phase phase);
     phase.set_jump_phase(null);
   end
   else begin
-    
+
     `UVM_PH_TRACE("PH/TRC/DONE","Completed phase",phase,UVM_LOW)
-    phase.set_state(UVM_PHASE_DONE);
+    this.set_phase_state(phase, UVM_PHASE_DONE);
     phase.m_phase_proc = null;
   end
 
@@ -804,4 +812,8 @@ function void uvm_phase_hopper::execute_on(uvm_phase imp,
                                            uvm_phase node);
   imp.execute(comp, node);
 endfunction : execute_on
-  
+
+function void uvm_phase_hopper::set_phase_state(uvm_phase phase, uvm_phase_state state);
+  phase.set_state(state);
+endfunction : set_phase_state
+

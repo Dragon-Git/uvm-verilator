@@ -68,3 +68,5 @@ uvm_ref/nd/Proj/Menu_Backup.txt
 uvm_ref/nd/Proj/Menu_save.txt
 uvm_ref/nd/Proj/Topics.txt
 
+# vscode files
+.vscode/*

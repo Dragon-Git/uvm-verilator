@@ -6,7 +6,7 @@
 // Copyright 2014 Intel Corporation
 // Copyright 2021-2022 Marvell International Ltd.
 // Copyright 2007-2014 Mentor Graphics Corporation
-// Copyright 2013-2024 NVIDIA Corporation
+// Copyright 2013-2026 NVIDIA Corporation
 // Copyright 2010-2014 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -29,8 +29,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/base/uvm_globals.svh $
-// $Rev:      2024-02-26 14:05:42 -0800 $
-// $Hash:     798b28d37d7fa808e18c64153f2b40baed27a5d1 $
+// $Rev:      2026-05-08 07:53:24 -0700 $
+// $Hash:     b79027c3a6650c9072fd2772cb849c270ae4cc85 $
 //
 //----------------------------------------------------------------------
 
@@ -38,6 +38,7 @@
 typedef class uvm_root;
 typedef class uvm_report_object;
 typedef class uvm_report_message;
+typedef class uvm_sequence_library_adder_base;
    
 // Title: Globals
 
@@ -396,7 +397,7 @@ endfunction
 // @uvm-ieee 1800.2-2020 auto F.3.1.3
 function void uvm_init(uvm_coreservice_t cs=null);
   uvm_default_coreservice_t dcs;
-  
+
   if(get_core_state()!=UVM_CORE_UNINITIALIZED) begin
     if (get_core_state() == UVM_CORE_PRE_INIT) begin
       // If we're in this state, something very strange has happened.
@@ -433,49 +434,11 @@ function void uvm_init(uvm_coreservice_t cs=null);
   end
   uvm_coreservice_t::set(cs);
 
-  // After this point, it should be safe to query the
-  // corservice for anything.  We're not done with
-  // initialization, but the coreservice (and the
-  // various elements it controls) are 'stable'.
-  //
-  // Note that a user could have something silly
-  // in their own space, like a specialization of
-  // uvm_root with a constructor that relies on a
-  // specialization of uvm_factory with a
-  // constructor that relies on the specialized
-  // root being constructed...  but there's not
-  // really anything that can be done about that.
-  m_uvm_core_state.push_front(UVM_CORE_INITIALIZING);
-  
-  foreach(uvm_deferred_init[idx]) begin
-    uvm_deferred_init[idx].initialize();
-  end
-  
-  uvm_deferred_init.delete();
-  
-  begin
-    uvm_root top;
-    top = uvm_root::get();
-    // These next calls were moved to uvm_init from uvm_root,
-    // because they could emit messages, resulting in the
-    // report server being queried, which causes uvm_init.
-    top.report_header();
-    top.m_check_uvm_field_flag_size();
-    // This sets up the global verbosity. Other command line args may
-    // change individual component verbosity.
-    top.m_check_verbosity();
-  end
+  cs.set_core_state(UVM_CORE_INITIALIZING);
 
-  m_uvm_core_state.push_front(UVM_CORE_INITIALIZED);
+  cs.initialize();
 
-  // initialize compat fields from uvm_object_globals
-  uvm_default_table_printer = new();
-  uvm_default_tree_printer = new();
-  uvm_default_line_printer = new();
-  uvm_default_printer = uvm_default_table_printer;
-  uvm_default_packer = new();
-  uvm_default_comparer = new();
-    
+  cs.set_core_state(UVM_CORE_INITIALIZED);
 endfunction
 
 //----------------------------------------------------------------------------

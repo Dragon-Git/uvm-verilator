@@ -28,8 +28,8 @@
 // Git details (see DEVELOPMENT.md):
 //
 // $File:     src/base/uvm_version.svh $
-// $Rev:      2024-08-22 11:25:40 -0700 $
-// $Hash:     2f4242f2c7d7a4f69948682895557eb89e24c414 $
+// $Rev:      2026-06-10 10:00:57 -0700 $
+// $Hash:     7b2dda610b341f455154c688c6dc94808645090e $
 //
 //----------------------------------------------------------------------
 
@@ -37,7 +37,7 @@
 `ifndef UVM_VERSION_SVH
 `define UVM_VERSION_SVH
 
-parameter string UVM_VERSION_STRING = "Accellera:1800.2:UVM:2020.3.1";
+parameter string UVM_VERSION_STRING = "Accellera:1800.2:UVM:2020.3.2";
 
 function string uvm_revision_string();
   return UVM_VERSION_STRING;
